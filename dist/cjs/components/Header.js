@@ -4,7 +4,6 @@ exports.headerStyles = exports.HeaderController = void 0;
 // 框架无关的 Header 逻辑层
 class HeaderController {
     constructor(props) {
-        this.isUserInfoShow = false;
         this.props = props;
     }
     get userInfo() {
@@ -28,51 +27,11 @@ class HeaderController {
             login: this.props.translations?.login ?? '登录'
         };
     }
-    toggleUserInfo() {
-        this.isUserInfoShow = !this.isUserInfoShow;
-        return this.isUserInfoShow;
-    }
-    getUserInfoVisible() {
-        return this.isUserInfoShow;
-    }
     handleLogout() {
         this.props.onLogout?.();
     }
-    handleLogin() {
-        this.props.onLogin?.();
-    }
     handleGoHome() {
         this.props.onGoHome?.();
-    }
-    getMenuItems() {
-        const items = [
-            {
-                label: this.translations.teacherDashboard,
-                href: '/teacher',
-                visible: this.hasRoles
-            },
-            {
-                label: this.translations.background,
-                href: '/services/admin/home',
-                visible: this.hasRoles
-            },
-            {
-                label: this.translations.account,
-                href: '/account',
-                visible: this.isLogin
-            },
-            {
-                label: this.translations.logout,
-                action: () => this.handleLogout(),
-                visible: this.isLogin
-            },
-            {
-                label: this.translations.login,
-                action: () => this.handleLogin(),
-                visible: !this.isLogin
-            }
-        ];
-        return items.filter(item => item.visible);
     }
 }
 exports.HeaderController = HeaderController;
@@ -81,75 +40,70 @@ exports.headerStyles = {
     container: {
         position: 'relative',
         backgroundColor: '#edae24',
-        padding: '10px 0',
-        minHeight: '50px'
+        height: 50,
+        display: 'flex',
+        alignItems: 'center'
     },
     logo: {
         position: 'absolute',
         top: 0,
-        left: '20px',
-        zIndex: 2000
+        left: 20,
+        height: 50,
+        display: 'flex',
+        alignItems: 'center',
+        zIndex: 2000,
+        cursor: 'pointer'
     },
     logoImage: {
         display: 'flex',
-        height: '50px',
+        height: 50,
         alignItems: 'center'
     },
     logoImg: {
-        height: '50px'
+        height: 36
     },
     logoTitle: {
-        marginLeft: '10px',
-        fontSize: '16px',
+        marginLeft: 10,
+        fontSize: 14,
         fontWeight: 600,
-        color: '#fff'
+        color: '#fff',
+        lineHeight: '50px'
     },
     userName: {
-        height: '32px',
-        position: 'relative',
-        float: 'right',
-        margin: '0.8em 20px 0.8em 0',
-        whiteSpace: 'nowrap',
+        height: 32,
         backgroundColor: '#0a3055',
-        borderRadius: '3px',
-        padding: '7px 14px',
-        fontSize: '14px',
-        lineHeight: '21px',
-        boxSizing: 'border-box',
-        textAlign: 'center',
-        zIndex: 1998,
+        borderRadius: 3,
+        padding: '0 14px',
+        fontSize: 14,
+        lineHeight: '32px',
         color: '#fff',
-        cursor: 'pointer'
-    },
-    userInfo: {
-        backgroundColor: 'white',
-        textAlign: 'left',
-        whiteSpace: 'nowrap',
-        position: 'absolute',
-        top: '64px',
-        right: '20px',
-        padding: 0,
-        zIndex: 1999,
-        fontSize: '14px',
-        overflow: 'hidden'
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 4
     },
     menuItem: {
-        borderTop: '1px solid #fff',
-        display: 'block',
-        padding: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        height: 32,
+        padding: '0 14px',
         color: '#fff',
-        backgroundColor: '#0a3055',
+        textDecoration: 'none',
+        borderTop: '1px solid rgba(255,255,255,0.2)',
         cursor: 'pointer',
-        textDecoration: 'none'
+        fontSize: 14,
+        backgroundColor: '#0a3055'
     },
-    editButton: {
-        border: 'none',
-        borderRadius: '3px',
-        background: '#0a3055',
+    menuItemFirst: {
+        display: 'flex',
+        alignItems: 'center',
+        height: 32,
+        padding: '0 14px',
         color: '#fff',
-        height: '32px',
-        padding: '0 10px',
-        cursor: 'pointer'
+        textDecoration: 'none',
+        cursor: 'pointer',
+        fontSize: 14,
+        backgroundColor: '#0a3055'
     }
 };
 //# sourceMappingURL=Header.js.map

@@ -1,98 +1,83 @@
 import type { HeaderProps, HeaderTranslations } from '../types';
 export declare class HeaderController {
     private props;
-    private isUserInfoShow;
     constructor(props: HeaderProps);
     get userInfo(): import("..").UserInfo;
     get schoolInfo(): import("..").SchoolInfo;
     get isLogin(): boolean;
     get hasRoles(): boolean;
     get translations(): Required<HeaderTranslations>;
-    toggleUserInfo(): boolean;
-    getUserInfoVisible(): boolean;
     handleLogout(): void;
-    handleLogin(): void;
     handleGoHome(): void;
-    getMenuItems(): {
-        label: string;
-        href?: string;
-        action?: () => void;
-        visible: boolean;
-    }[];
 }
 export declare const headerStyles: {
     container: {
         position: "relative";
         backgroundColor: string;
-        padding: string;
-        minHeight: string;
+        height: number;
+        display: string;
+        alignItems: string;
     };
     logo: {
         position: "absolute";
         top: number;
-        left: string;
+        left: number;
+        height: number;
+        display: string;
+        alignItems: string;
         zIndex: number;
+        cursor: string;
     };
     logoImage: {
         display: string;
-        height: string;
+        height: number;
         alignItems: string;
     };
     logoImg: {
-        height: string;
+        height: number;
     };
     logoTitle: {
-        marginLeft: string;
-        fontSize: string;
+        marginLeft: number;
+        fontSize: number;
         fontWeight: number;
         color: string;
+        lineHeight: string;
     };
     userName: {
-        height: string;
-        position: "relative";
-        float: "right";
-        margin: string;
-        whiteSpace: "nowrap";
+        height: number;
         backgroundColor: string;
-        borderRadius: string;
+        borderRadius: number;
         padding: string;
-        fontSize: string;
+        fontSize: number;
         lineHeight: string;
-        boxSizing: "border-box";
-        textAlign: "center";
-        zIndex: number;
         color: string;
         cursor: string;
-    };
-    userInfo: {
-        backgroundColor: string;
-        textAlign: "left";
-        whiteSpace: "nowrap";
-        position: "absolute";
-        top: string;
-        right: string;
-        padding: number;
-        zIndex: number;
-        fontSize: string;
-        overflow: string;
+        display: string;
+        alignItems: string;
+        gap: number;
     };
     menuItem: {
-        borderTop: string;
         display: string;
+        alignItems: string;
+        height: number;
         padding: string;
         color: string;
-        backgroundColor: string;
-        cursor: string;
         textDecoration: string;
-    };
-    editButton: {
-        border: string;
-        borderRadius: string;
-        background: string;
-        color: string;
-        height: string;
-        padding: string;
+        borderTop: string;
         cursor: string;
+        fontSize: number;
+        backgroundColor: string;
+    };
+    menuItemFirst: {
+        display: string;
+        alignItems: string;
+        height: number;
+        padding: string;
+        color: string;
+        textDecoration: string;
+        cursor: string;
+        fontSize: number;
+        backgroundColor: string;
     };
 };
 export type { HeaderProps, HeaderTranslations };
