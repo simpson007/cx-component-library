@@ -89,8 +89,6 @@ export const headerCss = `
 .shared-header .user-menu-glyph.show {
   transform: rotateX(180deg);
 }
-
-/* 登录弹框样式 */
 .shared-header .login-modal-overlay {
   position: fixed;
   top: 0;
@@ -212,7 +210,6 @@ export const headerCss = `
 }
 `
 
-// 注入样式
 let styleInjected = false
 function injectStyle() {
   if (styleInjected || typeof document === 'undefined') return
@@ -222,7 +219,8 @@ function injectStyle() {
   styleInjected = true
 }
 
-// Vue 组件配置（兼容 Vue 2 和 Vue 3）
+
+// Vue 组件配置
 export const SharedHeader = {
   name: 'SharedHeader',
   props: {
@@ -235,21 +233,20 @@ export const SharedHeader = {
     baseUrl: { type: String, default: '' }
   },
   emits: ['logout', 'login-success', 'go-home'],
+  expose: ['openLoginModal', 'closeLoginModal', 'showLoginModal'],
   data() {
     return {
       isUserInfoShow: false,
       showLoginModal: false,
       loginLoading: false,
       loginError: '',
-      loginForm: {
-        username: '',
-        password: ''
-      }
+      loginForm: { username: '', password: '' }
     }
   },
   computed: {
     t(): Required<HeaderTranslations> {
-      const trans = (this as any).translations || {}
+      const self = this as any
+      const trans = self.translations || {}
       return {
         teacherDashboard: trans.teacherDashboard || '教师后台',
         background: trans.background || '管理后台',
@@ -264,10 +261,10 @@ export const SharedHeader = {
   },
   methods: {
     toggleUserInfo() {
-      ;(this as any).isUserInfoShow = !(this as any).isUserInfoShow
+      (this as any).isUserInfoShow = !(this as any).isUserInfoShow
     },
     handleLogout() {
-      ;(this as any).$emit('logout')
+      (this as any).$emit('logout')
     },
     openLoginModal() {
       const self = this as any
@@ -284,7 +281,6 @@ export const SharedHeader = {
     },
     async submitLogin() {
       const self = this as any
-      
       if (!self.loginForm.username) {
         self.loginError = '请输入用户名'
         return
@@ -293,29 +289,19 @@ export const SharedHeader = {
         self.loginError = '请输入密码'
         return
       }
-      
       self.loginLoading = true
       self.loginError = ''
-      
       try {
         const formData = new FormData()
         formData.append('username', self.loginForm.username)
         formData.append('password', self.loginForm.password)
-        
         const url = self.baseUrl + self.loginApi
-        const response = await fetch(url, {
-          method: 'POST',
-          body: formData
-        })
-        
+        const response = await fetch(url, { method: 'POST', body: formData })
         const data = await response.json()
-        
         if (data.head?.code === '1000' && data.body) {
-          // 登录成功，存储 token 到 cookie
           const token = data.body.token
           const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString()
           document.cookie = 'token=' + token + '; expires=' + expires + '; path=/'
-          
           self.closeLoginModal()
           self.$emit('login-success', data.body)
         } else {
@@ -328,11 +314,11 @@ export const SharedHeader = {
       }
     },
     handleGoHome() {
-      ;(this as any).$emit('go-home')
+      (this as any).$emit('go-home')
     },
     handleKeydown(e: KeyboardEvent) {
       if (e.key === 'Enter') {
-        ;(this as any).submitLogin()
+        (this as any).submitLogin()
       }
     }
   },
@@ -344,17 +330,14 @@ export const SharedHeader = {
           <span class="tit">{{ schoolInfo.name }}</span>
         </template>
       </div>
-      
       <div class="header-actions">
         <slot name="actions"></slot>
       </div>
-      
       <div class="header-user-name" @click="toggleUserInfo">
         <i class="fa fa-user-o"></i>
         <span>{{ userInfo?.name || '游客' }}</span>
         <span class="user-menu-glyph" :class="{ show: isUserInfoShow }">▼</span>
       </div>
-      
       <div class="header-user-info" :style="{ height: isUserInfoShow ? 'auto' : '0' }">
         <ul>
           <li v-if="hasRoles"><a href="/teacher">{{ t.teacherDashboard }}</a></li>
@@ -364,8 +347,6 @@ export const SharedHeader = {
           <li v-if="!isLogin"><a href="javascript:void(0)" @click.prevent="openLoginModal">{{ t.login }}</a></li>
         </ul>
       </div>
-      
-      <!-- 登录弹框 -->
       <div class="login-modal-overlay" :class="{ show: showLoginModal }" @click.self="closeLoginModal">
         <div class="login-modal">
           <div class="login-modal-header">
@@ -395,18 +376,11 @@ export const SharedHeader = {
   `
 }
 
-// Vue 插件安装函数
 export function install(app: { component: (name: string, comp: unknown) => void }): void {
   injectStyle()
   app.component('SharedHeader', SharedHeader)
 }
 
-// 默认导出插件
-export default {
-  install,
-  SharedHeader
-}
-
-// 导出类型和样式
+export default { install, SharedHeader }
 export { headerCss as styles }
 export type { HeaderTranslations }

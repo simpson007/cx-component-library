@@ -90,8 +90,6 @@ exports.headerCss = `
 .shared-header .user-menu-glyph.show {
   transform: rotateX(180deg);
 }
-
-/* 登录弹框样式 */
 .shared-header .login-modal-overlay {
   position: fixed;
   top: 0;
@@ -213,7 +211,6 @@ exports.headerCss = `
 }
 `;
 exports.styles = exports.headerCss;
-// 注入样式
 let styleInjected = false;
 function injectStyle() {
     if (styleInjected || typeof document === 'undefined')
@@ -223,7 +220,7 @@ function injectStyle() {
     document.head.appendChild(style);
     styleInjected = true;
 }
-// Vue 组件配置（兼容 Vue 2 和 Vue 3）
+// Vue 组件配置
 exports.SharedHeader = {
     name: 'SharedHeader',
     props: {
@@ -236,21 +233,20 @@ exports.SharedHeader = {
         baseUrl: { type: String, default: '' }
     },
     emits: ['logout', 'login-success', 'go-home'],
+    expose: ['openLoginModal', 'closeLoginModal', 'showLoginModal'],
     data() {
         return {
             isUserInfoShow: false,
             showLoginModal: false,
             loginLoading: false,
             loginError: '',
-            loginForm: {
-                username: '',
-                password: ''
-            }
+            loginForm: { username: '', password: '' }
         };
     },
     computed: {
         t() {
-            const trans = this.translations || {};
+            const self = this;
+            const trans = self.translations || {};
             return {
                 teacherDashboard: trans.teacherDashboard || '教师后台',
                 background: trans.background || '管理后台',
@@ -265,11 +261,9 @@ exports.SharedHeader = {
     },
     methods: {
         toggleUserInfo() {
-            ;
             this.isUserInfoShow = !this.isUserInfoShow;
         },
         handleLogout() {
-            ;
             this.$emit('logout');
         },
         openLoginModal() {
@@ -302,13 +296,9 @@ exports.SharedHeader = {
                 formData.append('username', self.loginForm.username);
                 formData.append('password', self.loginForm.password);
                 const url = self.baseUrl + self.loginApi;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    body: formData
-                });
+                const response = await fetch(url, { method: 'POST', body: formData });
                 const data = await response.json();
                 if (data.head?.code === '1000' && data.body) {
-                    // 登录成功，存储 token 到 cookie
                     const token = data.body.token;
                     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
                     document.cookie = 'token=' + token + '; expires=' + expires + '; path=/';
@@ -327,12 +317,10 @@ exports.SharedHeader = {
             }
         },
         handleGoHome() {
-            ;
             this.$emit('go-home');
         },
         handleKeydown(e) {
             if (e.key === 'Enter') {
-                ;
                 this.submitLogin();
             }
         }
@@ -345,17 +333,14 @@ exports.SharedHeader = {
           <span class="tit">{{ schoolInfo.name }}</span>
         </template>
       </div>
-      
       <div class="header-actions">
         <slot name="actions"></slot>
       </div>
-      
       <div class="header-user-name" @click="toggleUserInfo">
         <i class="fa fa-user-o"></i>
         <span>{{ userInfo?.name || '游客' }}</span>
         <span class="user-menu-glyph" :class="{ show: isUserInfoShow }">▼</span>
       </div>
-      
       <div class="header-user-info" :style="{ height: isUserInfoShow ? 'auto' : '0' }">
         <ul>
           <li v-if="hasRoles"><a href="/teacher">{{ t.teacherDashboard }}</a></li>
@@ -365,8 +350,6 @@ exports.SharedHeader = {
           <li v-if="!isLogin"><a href="javascript:void(0)" @click.prevent="openLoginModal">{{ t.login }}</a></li>
         </ul>
       </div>
-      
-      <!-- 登录弹框 -->
       <div class="login-modal-overlay" :class="{ show: showLoginModal }" @click.self="closeLoginModal">
         <div class="login-modal">
           <div class="login-modal-header">
@@ -395,14 +378,9 @@ exports.SharedHeader = {
     </div>
   `
 };
-// Vue 插件安装函数
 function install(app) {
     injectStyle();
     app.component('SharedHeader', exports.SharedHeader);
 }
-// 默认导出插件
-exports.default = {
-    install,
-    SharedHeader: exports.SharedHeader
-};
+exports.default = { install, SharedHeader: exports.SharedHeader };
 //# sourceMappingURL=index.js.map
