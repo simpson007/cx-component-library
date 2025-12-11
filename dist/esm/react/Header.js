@@ -1,6 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useState, useMemo, useCallback } from 'react';
 import { HeaderController, headerStyles } from '../components/Header';
+import { getBaseUrl } from '../api/http';
 // 登录弹框样式
 const modalStyles = {
     overlay: {
@@ -178,7 +179,9 @@ export const SharedHeader = (props) => {
             const formData = new FormData();
             formData.append('username', loginForm.username);
             formData.append('password', loginForm.password);
-            const url = baseUrl + loginApi;
+            // 优先使用组件 prop 的 baseUrl，否则使用 initHttp 配置的 baseUrl
+            const actualBaseUrl = baseUrl || getBaseUrl();
+            const url = actualBaseUrl + loginApi;
             const response = await fetch(url, {
                 method: 'POST',
                 body: formData

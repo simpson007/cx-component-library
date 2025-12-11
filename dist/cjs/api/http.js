@@ -11,12 +11,14 @@ exports.get = get;
 exports.post = post;
 exports.put = put;
 exports.del = del;
+exports.getBaseUrl = getBaseUrl;
 const axios_1 = __importDefault(require("axios"));
 // 开发环境默认 baseUrl
 const DEV_BASE_URL = 'https://cx.istemedu.com';
 let httpInstance = null;
 let config = {};
 exports.httpConfig = config;
+let currentBaseUrl = '';
 /**
  * 初始化 HTTP 客户端
  * @param options 配置选项
@@ -41,6 +43,7 @@ function initHttp(options) {
         // 默认为空（生产环境）
         baseUrl = '';
     }
+    currentBaseUrl = baseUrl;
     httpInstance = axios_1.default.create({
         baseURL: baseUrl,
         timeout: options.timeout || 30000
@@ -92,5 +95,11 @@ function put(url, data) {
 }
 function del(url, data) {
     return request({ url, method: 'delete', data });
+}
+/**
+ * 获取当前配置的 baseUrl
+ */
+function getBaseUrl() {
+    return currentBaseUrl;
 }
 //# sourceMappingURL=http.js.map

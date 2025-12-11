@@ -3,6 +3,7 @@ import axios from 'axios';
 const DEV_BASE_URL = 'https://cx.istemedu.com';
 let httpInstance = null;
 let config = {};
+let currentBaseUrl = '';
 /**
  * 初始化 HTTP 客户端
  * @param options 配置选项
@@ -27,6 +28,7 @@ export function initHttp(options) {
         // 默认为空（生产环境）
         baseUrl = '';
     }
+    currentBaseUrl = baseUrl;
     httpInstance = axios.create({
         baseURL: baseUrl,
         timeout: options.timeout || 30000
@@ -80,4 +82,10 @@ export function del(url, data) {
     return request({ url, method: 'delete', data });
 }
 export { config as httpConfig };
+/**
+ * 获取当前配置的 baseUrl
+ */
+export function getBaseUrl() {
+    return currentBaseUrl;
+}
 //# sourceMappingURL=http.js.map

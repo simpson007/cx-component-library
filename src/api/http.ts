@@ -6,6 +6,7 @@ const DEV_BASE_URL = 'https://cx.istemedu.com'
 
 let httpInstance: AxiosInstance | null = null
 let config: HttpConfig = {}
+let currentBaseUrl = ''
 
 /**
  * 初始化 HTTP 客户端
@@ -30,6 +31,8 @@ export function initHttp(options: HttpConfig): AxiosInstance {
     // 默认为空（生产环境）
     baseUrl = ''
   }
+
+  currentBaseUrl = baseUrl
 
   httpInstance = axios.create({
     baseURL: baseUrl,
@@ -100,3 +103,10 @@ export function del<T = unknown>(url: string, data?: unknown): Promise<ApiRespon
 }
 
 export { config as httpConfig }
+
+/**
+ * 获取当前配置的 baseUrl
+ */
+export function getBaseUrl(): string {
+  return currentBaseUrl
+}

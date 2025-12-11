@@ -17,3 +17,7 @@ export declare function post<T = unknown>(url: string, data?: unknown): Promise<
 export declare function put<T = unknown>(url: string, data?: unknown): Promise<ApiResponse<T>>;
 export declare function del<T = unknown>(url: string, data?: unknown): Promise<ApiResponse<T>>;
 export { config as httpConfig };
+/**
+ * 获取当前配置的 baseUrl
+ */
+export declare function getBaseUrl(): string;

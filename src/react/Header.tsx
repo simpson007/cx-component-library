@@ -1,5 +1,6 @@
 import React, { useState, useMemo, ReactNode, useCallback } from 'react'
 import { HeaderController, headerStyles } from '../components/Header'
+import { getBaseUrl } from '../api/http'
 import type { HeaderProps } from '../types'
 
 interface SharedHeaderProps extends HeaderProps {
@@ -200,7 +201,9 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
       formData.append('username', loginForm.username)
       formData.append('password', loginForm.password)
 
-      const url = baseUrl + loginApi
+      // 优先使用组件 prop 的 baseUrl，否则使用 initHttp 配置的 baseUrl
+      const actualBaseUrl = baseUrl || getBaseUrl()
+      const url = actualBaseUrl + loginApi
       const response = await fetch(url, {
         method: 'POST',
         body: formData

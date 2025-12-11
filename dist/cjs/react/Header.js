@@ -37,6 +37,7 @@ exports.SharedHeader = void 0;
 const jsx_runtime_1 = require("react/jsx-runtime");
 const react_1 = __importStar(require("react"));
 const Header_1 = require("../components/Header");
+const http_1 = require("../api/http");
 // 登录弹框样式
 const modalStyles = {
     overlay: {
@@ -214,7 +215,9 @@ const SharedHeader = (props) => {
             const formData = new FormData();
             formData.append('username', loginForm.username);
             formData.append('password', loginForm.password);
-            const url = baseUrl + loginApi;
+            // 优先使用组件 prop 的 baseUrl，否则使用 initHttp 配置的 baseUrl
+            const actualBaseUrl = baseUrl || (0, http_1.getBaseUrl)();
+            const url = actualBaseUrl + loginApi;
             const response = await fetch(url, {
                 method: 'POST',
                 body: formData
