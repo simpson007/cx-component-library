@@ -35,7 +35,6 @@ export interface HeaderProps {
   isLogin: boolean
   hasRoles?: boolean
   onLogout?: () => void
-  onLogin?: () => void
   onGoHome?: () => void
   translations?: HeaderTranslations
 }
@@ -46,10 +45,4 @@ export interface HeaderTranslations {
   account?: string
   logout?: string
   login?: string
-}
-
-export interface OssUploadOptions {
-  folder?: string
-  kind?: string
-  originName?: string
 }
