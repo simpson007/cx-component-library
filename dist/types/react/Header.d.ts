@@ -3,8 +3,6 @@ import type { HeaderProps } from '../types';
 interface SharedHeaderProps extends HeaderProps {
     children?: ReactNode;
     menuContent?: ReactNode;
-    loginApi?: string;
-    baseUrl?: string;
     loading?: boolean;
     onLoginSuccess?: (userData: any) => void;
 }

@@ -1,172 +1,300 @@
-import React, { useState, useMemo, ReactNode, useCallback } from 'react'
-import { HeaderController, headerStyles } from '../components/Header'
+import React, { useState, useMemo, ReactNode, useCallback, useEffect } from 'react'
 import { postSchoolLogin } from '../api/endpoints'
-import type { HeaderProps } from '../types'
+import type { HeaderProps, HeaderTranslations } from '../types'
 
 interface SharedHeaderProps extends HeaderProps {
   children?: ReactNode
   menuContent?: ReactNode
-  loginApi?: string
-  baseUrl?: string
   loading?: boolean
   onLoginSuccess?: (userData: any) => void
 }
 
-// 登录弹框样式
-const modalStyles: Record<string, React.CSSProperties> = {
-  overlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 9999,
-    transition: 'all 0.3s'
-  },
-  modal: {
-    background: '#fff',
-    borderRadius: 8,
-    width: 400,
-    maxWidth: '90%',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
-  },
-  header: {
-    padding: '16px 20px',
-    borderBottom: '1px solid #eee',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  title: {
-    margin: 0,
-    fontSize: 18,
-    color: '#333'
-  },
-  closeBtn: {
-    background: 'none',
-    border: 'none',
-    fontSize: 24,
-    cursor: 'pointer',
-    color: '#999',
-    lineHeight: 1
-  },
-  body: {
-    padding: '24px 20px'
-  },
-  formGroup: {
-    marginBottom: 16
-  },
-  label: {
-    display: 'block',
-    marginBottom: 6,
-    fontSize: 14,
-    color: '#333'
-  },
-  input: {
-    width: '100%',
-    padding: '10px 12px',
-    border: '1px solid #ddd',
-    borderRadius: 4,
-    fontSize: 14,
-    boxSizing: 'border-box' as const
-  },
-  error: {
-    color: '#e74c3c',
-    fontSize: 13,
-    marginBottom: 12
-  },
-  footer: {
-    padding: '16px 20px',
-    borderTop: '1px solid #eee',
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: 12
-  },
-  btn: {
-    padding: '10px 24px',
-    border: 'none',
-    borderRadius: 4,
-    fontSize: 14,
-    cursor: 'pointer'
-  },
-  btnCancel: {
-    background: '#f5f5f5',
-    color: '#666'
-  },
-  btnSubmit: {
-    background: '#edae24',
-    color: '#fff'
-  },
-  btnDisabled: {
-    background: '#ccc',
-    cursor: 'not-allowed'
-  }
+// 组件样式（与 Vue 版本一致）
+const headerCss = `
+.shared-header {
+  position: relative;
+  background-color: #edae24;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+.shared-header * {
+  box-sizing: border-box;
+}
+.shared-header .header-logo {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  z-index: 2000;
+  cursor: pointer;
+}
+.shared-header .header-logo img {
+  height: 36px;
+}
+.shared-header .header-logo .tit {
+  margin-left: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 50px;
+}
+.shared-header .header-right {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.shared-header .header-actions {
+  display: flex;
+  gap: 10px;
+}
+.shared-header .header-user-name {
+  height: 32px;
+  background-color: #0a3055;
+  border-radius: 3px;
+  padding: 0 14px;
+  font-size: 14px;
+  line-height: 32px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.shared-header .header-login-btn {
+  height: 32px;
+  background-color: #0a3055;
+  border-radius: 3px;
+  padding: 0 14px;
+  font-size: 14px;
+  line-height: 32px;
+  color: #fff;
+  cursor: pointer;
+  border: none;
+}
+.shared-header .header-login-btn:hover {
+  background-color: #0d3a6a;
+}
+.shared-header .header-user-info {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  background-color: #0a3055;
+  z-index: 1999;
+  overflow: hidden;
+  transition: height 0.5s;
+  white-space: nowrap;
+  min-width: max-content;
+}
+.shared-header .header-user-info ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.shared-header .header-user-info a,
+.shared-header .header-user-info .menu-item {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 14px;
+  color: #fff;
+  text-decoration: none;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  cursor: pointer;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.shared-header .header-user-info li:first-child a,
+.shared-header .header-user-info li:first-child .menu-item {
+  border-top: none;
+}
+.shared-header .header-user-info a:hover,
+.shared-header .header-user-info .menu-item:hover {
+  background-color: #0d3a6a;
+}
+.shared-header .user-menu-glyph {
+  transition: transform 0.5s;
+  font-size: 12px;
+}
+.shared-header .user-menu-glyph.show {
+  transform: rotateX(180deg);
 }
 
-// 骨架屏样式
-const skeletonStyles: Record<string, React.CSSProperties> = {
-  base: {
-    background: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 4,
-    animation: 'skeleton-pulse 1.5s ease-in-out infinite'
-  },
-  logo: {
-    width: 36,
-    height: 36,
-    borderRadius: 4
-  },
-  title: {
-    width: 80,
-    height: 16,
-    marginLeft: 10
-  },
-  user: {
-    width: 70,
-    height: 32,
-    position: 'absolute' as const,
-    right: 20,
-    top: '50%',
-    transform: 'translateY(-50%)',
-    borderRadius: 3
-  }
+/* 骨架屏样式 */
+@keyframes skeleton-pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+.shared-header .skeleton {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+.shared-header .skeleton-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+}
+.shared-header .skeleton-title {
+  width: 80px;
+  height: 16px;
+  margin-left: 10px;
+}
+.shared-header .skeleton-user {
+  width: 70px;
+  height: 32px;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 3px;
 }
 
-// 注入骨架屏动画样式
-let skeletonStyleInjected = false
-function injectSkeletonStyle() {
-  if (skeletonStyleInjected || typeof document === 'undefined') return
+/* 登录弹框样式 */
+.shared-header .login-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.shared-header .login-modal {
+  background: #fff;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+.shared-header .login-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.shared-header .login-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+.shared-header .login-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  line-height: 1;
+}
+.shared-header .login-modal-close:hover {
+  color: #333;
+}
+.shared-header .login-modal-body {
+  padding: 24px 20px;
+}
+.shared-header .login-form-group {
+  margin-bottom: 16px;
+}
+.shared-header .login-form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #333;
+}
+.shared-header .login-form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.shared-header .login-form-group input:focus {
+  outline: none;
+  border-color: #edae24;
+}
+.shared-header .login-error {
+  color: #e74c3c;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.shared-header .login-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.shared-header .login-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.shared-header .login-btn-cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+.shared-header .login-btn-cancel:hover {
+  background: #eee;
+}
+.shared-header .login-btn-submit {
+  background: #edae24;
+  color: #fff;
+}
+.shared-header .login-btn-submit:hover {
+  background: #d9a020;
+}
+.shared-header .login-btn-submit:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+`
+
+let styleInjected = false
+function injectStyle() {
+  if (styleInjected || typeof document === 'undefined') return
   const style = document.createElement('style')
-  style.textContent = `
-    @keyframes skeleton-pulse {
-      0% { opacity: 0.6; }
-      50% { opacity: 1; }
-      100% { opacity: 0.6; }
-    }
-  `
+  style.textContent = headerCss
   document.head.appendChild(style)
-  skeletonStyleInjected = true
+  styleInjected = true
 }
 
 export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
-  const { loginApi = '/api/v1/school/login', baseUrl = '', loading = false, onLoginSuccess } = props
-  
-  // 注入骨架屏动画样式
-  React.useEffect(() => {
-    injectSkeletonStyle()
+  const { loading = false, onLoginSuccess } = props
+
+  // 注入样式
+  useEffect(() => {
+    injectStyle()
   }, [])
-  
+
   const [isUserInfoShow, setIsUserInfoShow] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError, setLoginError] = useState('')
   const [loginForm, setLoginForm] = useState({ username: '', password: '' })
-  
-  const controller = useMemo(() => new HeaderController(props), [props])
-  const t = controller.translations
+
+  const t: Required<HeaderTranslations> = useMemo(
+    () => ({
+      logout: props.translations?.logout || '退出登录',
+      login: props.translations?.login || '登录'
+    }),
+    [props.translations]
+  )
 
   const toggleUserInfo = () => setIsUserInfoShow(!isUserInfoShow)
 
@@ -201,15 +329,12 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
       formData.append('username', loginForm.username)
       formData.append('password', loginForm.password)
 
-      // 使用 postSchoolLogin API（会自动使用 initHttp 配置的 baseUrl）
       const data = await postSchoolLogin(formData)
 
       if (data.head?.code === '1000' && data.body) {
-        // 登录成功，存储 token 到 cookie
         const token = (data.body as any).token
         const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString()
         document.cookie = `token=${token}; expires=${expires}; path=/`
-
         closeLoginModal()
         onLoginSuccess?.(data.body)
       } else {
@@ -222,100 +347,59 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
     }
   }, [loginForm, onLoginSuccess, closeLoginModal])
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      submitLogin()
-    }
-  }, [submitLogin])
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        submitLogin()
+      }
+    },
+    [submitLogin]
+  )
 
-
+  const handleGoHome = () => props.onGoHome?.()
+  const handleLogout = () => props.onLogout?.()
 
   return (
-    <div style={{ position: 'relative', backgroundColor: '#edae24', height: 50, display: 'flex', alignItems: 'center' }}>
-      {/* Logo */}
-      <div style={headerStyles.logo} onClick={controller.handleGoHome.bind(controller)}>
+    <div className="shared-header">
+      {/* Logo 区域 */}
+      <div className="header-logo" onClick={handleGoHome}>
         {loading ? (
-          <div style={headerStyles.logoImage}>
-            <div style={{ ...skeletonStyles.base, ...skeletonStyles.logo }} />
-            <div style={{ ...skeletonStyles.base, ...skeletonStyles.title }} />
-          </div>
-        ) : props.schoolInfo && Object.keys(props.schoolInfo).length > 0 ? (
-          <div style={headerStyles.logoImage}>
-            <img 
-              style={headerStyles.logoImg} 
-              src={props.schoolInfo.logo} 
-              alt="logo" 
-            />
-            <div style={headerStyles.logoTitle}>{props.schoolInfo.name}</div>
-          </div>
+          <>
+            <div className="skeleton skeleton-logo"></div>
+            <div className="skeleton skeleton-title"></div>
+          </>
+        ) : props.schoolInfo?.logo ? (
+          <>
+            <img src={props.schoolInfo.logo} alt="logo" />
+            <span className="tit">{props.schoolInfo.name}</span>
+          </>
         ) : null}
       </div>
 
-      {/* 右侧区域：自定义按钮 + 用户/登录 */}
+      {/* 右侧区域 */}
       {loading ? (
-        <div style={{ ...skeletonStyles.base, ...skeletonStyles.user }} />
+        <div className="skeleton skeleton-user"></div>
       ) : (
-        <div style={{ position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="header-right">
           {/* 自定义操作区域 */}
-          {props.children && (
-            <div style={{ display: 'flex', gap: 10 }}>
-              {props.children}
-            </div>
-          )}
+          {props.children && <div className="header-actions">{props.children}</div>}
 
-          {/* User Name / Login Button */}
+          {/* 用户信息区域 */}
           {props.isLogin ? (
             <div style={{ position: 'relative' }}>
               {/* 已登录：显示用户名+下拉箭头 */}
-              <div style={{ ...headerStyles.userName, position: 'relative', right: 'auto', top: 'auto', transform: 'none' }} onClick={toggleUserInfo}>
-                <i className="fa fa-user-o" style={{ marginRight: 4 }} />
-                <span>{props.userInfo.name}</span>
-                <span 
-                  style={{ 
-                    display: 'inline-block',
-                    transition: 'transform 0.5s',
-                    transform: isUserInfoShow ? 'rotateX(180deg)' : 'none',
-                    marginLeft: 4,
-                    fontSize: 12
-                  }}
-                >
-                  ▼
-                </span>
+              <div className="header-user-name" onClick={toggleUserInfo}>
+                <i className="fa fa-user-o"></i>
+                <span>{props.userInfo?.name || '游客'}</span>
+                <span className={`user-menu-glyph ${isUserInfoShow ? 'show' : ''}`}>▼</span>
               </div>
-
-              {/* User Info Dropdown */}
-              <div 
-                style={{
-                  position: 'absolute',
-                  top: 32,
-                  right: 0,
-                  backgroundColor: '#0a3055',
-                  zIndex: 1999,
-                  overflow: 'hidden',
-                  transition: 'height 0.5s',
-                  height: isUserInfoShow ? 'auto' : 0
-                }}
-              >
-                <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+              <div className="header-user-info" style={{ height: isUserInfoShow ? 'auto' : 0 }}>
+                <ul>
                   {/* 用户自定义菜单项 */}
                   {props.menuContent}
                   {/* 退出登录（始终显示） */}
                   <li>
-                    <a 
-                      href="javascript:void(0)" 
-                      onClick={(e) => { e.preventDefault(); props.onLogout?.() }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        height: 32,
-                        padding: '0 14px',
-                        color: '#fff',
-                        textDecoration: 'none',
-                        borderTop: props.menuContent ? '1px solid rgba(255,255,255,0.2)' : 'none',
-                        cursor: 'pointer',
-                        fontSize: 14
-                      }}
-                    >
+                    <a href="javascript:void(0)" onClick={handleLogout}>
                       {t.logout}
                     </a>
                   </li>
@@ -324,20 +408,7 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
             </div>
           ) : (
             /* 未登录：显示登录按钮 */
-            <button 
-              style={{
-                height: 32,
-                backgroundColor: '#0a3055',
-                borderRadius: 3,
-                padding: '0 14px',
-                fontSize: 14,
-                lineHeight: '32px',
-                color: '#fff',
-                cursor: 'pointer',
-                border: 'none'
-              }}
-              onClick={openLoginModal}
-            >
+            <button className="header-login-btn" onClick={openLoginModal}>
               {t.login}
             </button>
           )}
@@ -346,52 +417,42 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
 
       {/* 登录弹框 */}
       {showLoginModal && (
-        <div style={modalStyles.overlay} onClick={(e) => e.target === e.currentTarget && closeLoginModal()}>
-          <div style={modalStyles.modal}>
-            <div style={modalStyles.header}>
-              <h3 style={modalStyles.title}>用户登录</h3>
-              <button style={modalStyles.closeBtn} onClick={closeLoginModal}>&times;</button>
+        <div className="login-modal-overlay" onClick={(e) => e.target === e.currentTarget && closeLoginModal()}>
+          <div className="login-modal">
+            <div className="login-modal-header">
+              <h3>用户登录</h3>
+              <button className="login-modal-close" onClick={closeLoginModal}>
+                &times;
+              </button>
             </div>
-            <div style={modalStyles.body}>
-              {loginError && <div style={modalStyles.error}>{loginError}</div>}
-              <div style={modalStyles.formGroup}>
-                <label style={modalStyles.label}>用户名</label>
+            <div className="login-modal-body">
+              {loginError && <div className="login-error">{loginError}</div>}
+              <div className="login-form-group">
+                <label>用户名</label>
                 <input
                   type="text"
-                  style={modalStyles.input}
                   placeholder="请输入用户名"
                   value={loginForm.username}
-                  onChange={(e) => setLoginForm(prev => ({ ...prev, username: e.target.value }))}
+                  onChange={(e) => setLoginForm((prev) => ({ ...prev, username: e.target.value }))}
                   onKeyDown={handleKeyDown}
                 />
               </div>
-              <div style={modalStyles.formGroup}>
-                <label style={modalStyles.label}>密码</label>
+              <div className="login-form-group">
+                <label>密码</label>
                 <input
                   type="password"
-                  style={modalStyles.input}
                   placeholder="请输入密码"
                   value={loginForm.password}
-                  onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
+                  onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
                   onKeyDown={handleKeyDown}
                 />
               </div>
             </div>
-            <div style={modalStyles.footer}>
-              <button 
-                style={{ ...modalStyles.btn, ...modalStyles.btnCancel }} 
-                onClick={closeLoginModal}
-              >
+            <div className="login-modal-footer">
+              <button className="login-btn login-btn-cancel" onClick={closeLoginModal}>
                 取消
               </button>
-              <button
-                style={{ 
-                  ...modalStyles.btn, 
-                  ...(loginLoading ? modalStyles.btnDisabled : modalStyles.btnSubmit) 
-                }}
-                onClick={submitLogin}
-                disabled={loginLoading}
-              >
+              <button className="login-btn login-btn-submit" onClick={submitLogin} disabled={loginLoading}>
                 {loginLoading ? '登录中...' : '登录'}
               </button>
             </div>
