@@ -1,9 +1,19 @@
 // 通用类型定义
+export interface UserRole {
+  admin?: boolean
+  super_admin?: boolean
+  [key: string]: unknown
+}
+
 export interface UserInfo {
   id: string | number
   name: string
+  role?: UserRole[]
   [key: string]: unknown
 }
+
+// 用户角色类型
+export type UserRoleType = 'guest' | 'user' | 'admin' | 'superAdmin'
 
 export interface SchoolInfo {
   logo: string

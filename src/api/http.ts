@@ -1,14 +1,36 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import type { HttpConfig, ApiResponse } from '../types'
 
+// 开发环境默认 baseUrl
+const DEV_BASE_URL = 'https://cx.istemedu.com'
+
+// 判断是否为开发环境
+function isDev(): boolean {
+  if (typeof process !== 'undefined' && process.env?.NODE_ENV) {
+    return process.env.NODE_ENV === 'development'
+  }
+  if (typeof window !== 'undefined' && window.location) {
+    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  }
+  return false
+}
+
+// 获取默认 baseUrl
+function getDefaultBaseUrl(): string {
+  return isDev() ? DEV_BASE_URL : ''
+}
+
 let httpInstance: AxiosInstance | null = null
 let config: HttpConfig = {}
 
 export function initHttp(options: HttpConfig): AxiosInstance {
   config = options
-  
+
+  // 如果未指定 baseUrl，根据环境自动设置
+  const baseUrl = options.baseUrl !== undefined ? options.baseUrl : getDefaultBaseUrl()
+
   httpInstance = axios.create({
-    baseURL: options.baseUrl || '',
+    baseURL: baseUrl,
     timeout: options.timeout || 30000
   })
 
