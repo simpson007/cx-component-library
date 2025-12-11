@@ -1,10 +1,28 @@
 import axios from 'axios';
+// 开发环境默认 baseUrl
+const DEV_BASE_URL = 'https://cx.istemedu.com';
+// 判断是否为开发环境
+function isDev() {
+    if (typeof process !== 'undefined' && process.env?.NODE_ENV) {
+        return process.env.NODE_ENV === 'development';
+    }
+    if (typeof window !== 'undefined' && window.location) {
+        return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    }
+    return false;
+}
+// 获取默认 baseUrl
+function getDefaultBaseUrl() {
+    return isDev() ? DEV_BASE_URL : '';
+}
 let httpInstance = null;
 let config = {};
 export function initHttp(options) {
     config = options;
+    // 如果未指定 baseUrl，根据环境自动设置
+    const baseUrl = options.baseUrl !== undefined ? options.baseUrl : getDefaultBaseUrl();
     httpInstance = axios.create({
-        baseURL: options.baseUrl || '',
+        baseURL: baseUrl,
         timeout: options.timeout || 30000
     });
     httpInstance.interceptors.request.use((reqConfig) => {

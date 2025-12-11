@@ -5,7 +5,6 @@ export declare class HeaderController {
     get userInfo(): import("..").UserInfo;
     get schoolInfo(): import("..").SchoolInfo;
     get isLogin(): boolean;
-    get hasRoles(): boolean;
     get translations(): Required<HeaderTranslations>;
     handleLogout(): void;
     handleGoHome(): void;

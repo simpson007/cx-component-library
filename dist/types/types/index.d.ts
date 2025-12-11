@@ -1,8 +1,15 @@
+export interface UserRole {
+    admin?: boolean;
+    super_admin?: boolean;
+    [key: string]: unknown;
+}
 export interface UserInfo {
     id: string | number;
     name: string;
+    role?: UserRole[];
     [key: string]: unknown;
 }
+export type UserRoleType = 'guest' | 'user' | 'admin' | 'superAdmin';
 export interface SchoolInfo {
     logo: string;
     name: string;
@@ -28,21 +35,11 @@ export interface HeaderProps {
     userInfo: UserInfo;
     schoolInfo: SchoolInfo;
     isLogin: boolean;
-    hasRoles?: boolean;
     onLogout?: () => void;
-    onLogin?: () => void;
     onGoHome?: () => void;
     translations?: HeaderTranslations;
 }
 export interface HeaderTranslations {
-    teacherDashboard?: string;
-    background?: string;
-    account?: string;
     logout?: string;
     login?: string;
-}
-export interface OssUploadOptions {
-    folder?: string;
-    kind?: string;
-    originName?: string;
 }

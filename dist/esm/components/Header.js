@@ -12,14 +12,8 @@ export class HeaderController {
     get isLogin() {
         return this.props.isLogin;
     }
-    get hasRoles() {
-        return this.props.hasRoles ?? false;
-    }
     get translations() {
         return {
-            teacherDashboard: this.props.translations?.teacherDashboard ?? '教师主页',
-            background: this.props.translations?.background ?? '管理后台',
-            account: this.props.translations?.account ?? '账户',
             logout: this.props.translations?.logout ?? '退出登录',
             login: this.props.translations?.login ?? '登录'
         };

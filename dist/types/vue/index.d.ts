@@ -15,10 +15,6 @@ export declare const SharedHeader: {
             type: BooleanConstructor;
             default: boolean;
         };
-        hasRoles: {
-            type: BooleanConstructor;
-            default: boolean;
-        };
         loading: {
             type: BooleanConstructor;
             default: boolean;
@@ -80,10 +76,6 @@ declare const _default: {
                 default: () => {};
             };
             isLogin: {
-                type: BooleanConstructor;
-                default: boolean;
-            };
-            hasRoles: {
                 type: BooleanConstructor;
                 default: boolean;
             };
