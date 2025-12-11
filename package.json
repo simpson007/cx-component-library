@@ -1,0 +1,96 @@
+{
+  "name": "cx-component-library",
+  "version": "1.0.1",
+  "description": "畅学通用组件和API库",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./api": {
+      "import": "./dist/esm/api/index.js",
+      "require": "./dist/cjs/api/index.js",
+      "types": "./dist/types/api/index.d.ts"
+    },
+    "./components": {
+      "import": "./dist/esm/components/index.js",
+      "require": "./dist/cjs/components/index.js",
+      "types": "./dist/types/components/index.d.ts"
+    },
+    "./vue": {
+      "import": "./dist/esm/vue/index.js",
+      "require": "./dist/cjs/vue/index.js",
+      "types": "./dist/types/vue/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/esm/react/index.js",
+      "require": "./dist/cjs/react/index.js",
+      "types": "./dist/types/react/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm run build:esm && npm run build:cjs && npm run build:types",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:types": "tsc -p tsconfig.types.json",
+    "dev": "tsc -w -p tsconfig.esm.json",
+    "preview": "vite",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build",
+    "release": "npm run build && git add dist && git commit -m 'build: update dist' && git push"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "vue": "^2.6.0 || ^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vue": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "js-cookie": "^3.0.5"
+  },
+  "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
+    "@types/node": "^20.10.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.55.0",
+    "typescript": "^5.3.0",
+    "vite": "^5.4.21",
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "api",
+    "http-client",
+    "header-component",
+    "cross-framework"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "your-repo-url"
+  }
+}

@@ -1,0 +1,11 @@
+import { AxiosInstance, AxiosRequestConfig } from 'axios';
+import type { HttpConfig, ApiResponse } from '../types';
+declare let config: HttpConfig;
+export declare function initHttp(options: HttpConfig): AxiosInstance;
+export declare function getHttpInstance(): AxiosInstance;
+export declare function request<T = unknown>(reqConfig: AxiosRequestConfig): Promise<ApiResponse<T>>;
+export declare function get<T = unknown>(url: string, params?: Record<string, unknown>): Promise<ApiResponse<T>>;
+export declare function post<T = unknown>(url: string, data?: unknown): Promise<ApiResponse<T>>;
+export declare function put<T = unknown>(url: string, data?: unknown): Promise<ApiResponse<T>>;
+export declare function del<T = unknown>(url: string, data?: unknown): Promise<ApiResponse<T>>;
+export { config as httpConfig };

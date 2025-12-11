@@ -1,0 +1,10 @@
+export declare function setOssBaseUrl(url: string): void;
+export declare function uploadImage(file: File): Promise<string>;
+export declare function uploadVideo(file: File, folder?: string): Promise<string>;
+export declare function uploadText(content: string): Promise<string>;
+export declare function uploadHtml(content: string): Promise<string>;
+export declare function uploadMusic(file: File | Blob): Promise<string>;
+export declare function uploadMarkdown(content: string): Promise<string>;
+export declare function uploadDoc(content: string): Promise<string>;
+export declare function uploadBase64Image(base64: string): Promise<string>;
+export declare function uploadKnowledgeFile(file: File): Promise<string>;
