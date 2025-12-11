@@ -300,26 +300,30 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
                   height: isUserInfoShow ? 'auto' : 0
                 }}
               >
-                {props.menuContent || (
-                  <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                    {props.hasRoles && (
-                      <>
-                        <li><a href="/teacher" style={headerStyles.menuItem}>{t.teacherDashboard}</a></li>
-                        <li><a href="/services/admin/home" style={headerStyles.menuItem}>{t.background}</a></li>
-                      </>
-                    )}
-                    <li><a href="/account" style={headerStyles.menuItem}>{t.account}</a></li>
-                    <li>
-                      <a 
-                        href="javascript:void(0)" 
-                        onClick={(e) => { e.preventDefault(); props.onLogout?.() }}
-                        style={headerStyles.menuItem}
-                      >
-                        {t.logout}
-                      </a>
-                    </li>
-                  </ul>
-                )}
+                <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                  {/* 用户自定义菜单项 */}
+                  {props.menuContent}
+                  {/* 退出登录（始终显示） */}
+                  <li>
+                    <a 
+                      href="javascript:void(0)" 
+                      onClick={(e) => { e.preventDefault(); props.onLogout?.() }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        height: 32,
+                        padding: '0 14px',
+                        color: '#fff',
+                        textDecoration: 'none',
+                        borderTop: props.menuContent ? '1px solid rgba(255,255,255,0.2)' : 'none',
+                        cursor: 'pointer',
+                        fontSize: 14
+                      }}
+                    >
+                      {t.logout}
+                    </a>
+                  </li>
+                </ul>
               </div>
             </div>
           ) : (

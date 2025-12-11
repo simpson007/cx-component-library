@@ -89,12 +89,20 @@ export const headerCss = `
 }
 .shared-header .header-user-info a,
 .shared-header .header-user-info .menu-item {
-  display: block;
-  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 14px;
   color: #fff;
   text-decoration: none;
   border-top: 1px solid rgba(255,255,255,0.2);
   cursor: pointer;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.shared-header .header-user-info li:first-child a,
+.shared-header .header-user-info li:first-child .menu-item {
+  border-top: none;
 }
 .shared-header .header-user-info a:hover,
 .shared-header .header-user-info .menu-item:hover {
@@ -407,14 +415,12 @@ export const SharedHeader = {
             <span class="user-menu-glyph" :class="{ show: isUserInfoShow }">▼</span>
           </div>
           <div class="header-user-info" :style="{ height: isUserInfoShow ? 'auto' : '0' }">
-            <slot name="menu">
-              <ul>
-                <li v-if="hasRoles"><a href="/teacher">{{ t.teacherDashboard }}</a></li>
-                <li v-if="hasRoles"><a href="/services/admin/home">{{ t.background }}</a></li>
-                <li><a href="/account">{{ t.account }}</a></li>
-                <li><a href="javascript:void(0)" @click.prevent="handleLogout">{{ t.logout }}</a></li>
-              </ul>
-            </slot>
+            <ul>
+              <!-- 用户自定义菜单项插槽 -->
+              <slot name="menu"></slot>
+              <!-- 退出登录（始终显示） -->
+              <li><a href="javascript:void(0)" @click.prevent="handleLogout">{{ t.logout }}</a></li>
+            </ul>
           </div>
         </template>
         <template v-else>

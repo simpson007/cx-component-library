@@ -21,7 +21,7 @@ class HeaderController {
     }
     get translations() {
         return {
-            teacherDashboard: this.props.translations?.teacherDashboard ?? '教师后台',
+            teacherDashboard: this.props.translations?.teacherDashboard ?? '教师主页',
             background: this.props.translations?.background ?? '管理后台',
             account: this.props.translations?.account ?? '账户',
             logout: this.props.translations?.logout ?? '退出登录',

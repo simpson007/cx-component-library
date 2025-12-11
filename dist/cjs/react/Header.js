@@ -259,7 +259,17 @@ const SharedHeader = (props) => {
                                     overflow: 'hidden',
                                     transition: 'height 0.5s',
                                     height: isUserInfoShow ? 'auto' : 0
-                                }, children: props.menuContent || ((0, jsx_runtime_1.jsxs)("ul", { style: { listStyle: 'none', margin: 0, padding: 0 }, children: [props.hasRoles && ((0, jsx_runtime_1.jsxs)(jsx_runtime_1.Fragment, { children: [(0, jsx_runtime_1.jsx)("li", { children: (0, jsx_runtime_1.jsx)("a", { href: "/teacher", style: Header_1.headerStyles.menuItem, children: t.teacherDashboard }) }), (0, jsx_runtime_1.jsx)("li", { children: (0, jsx_runtime_1.jsx)("a", { href: "/services/admin/home", style: Header_1.headerStyles.menuItem, children: t.background }) })] })), (0, jsx_runtime_1.jsx)("li", { children: (0, jsx_runtime_1.jsx)("a", { href: "/account", style: Header_1.headerStyles.menuItem, children: t.account }) }), (0, jsx_runtime_1.jsx)("li", { children: (0, jsx_runtime_1.jsx)("a", { href: "javascript:void(0)", onClick: (e) => { e.preventDefault(); props.onLogout?.(); }, style: Header_1.headerStyles.menuItem, children: t.logout }) })] })) })] })) : (
+                                }, children: (0, jsx_runtime_1.jsxs)("ul", { style: { listStyle: 'none', margin: 0, padding: 0 }, children: [props.menuContent, (0, jsx_runtime_1.jsx)("li", { children: (0, jsx_runtime_1.jsx)("a", { href: "javascript:void(0)", onClick: (e) => { e.preventDefault(); props.onLogout?.(); }, style: {
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    height: 32,
+                                                    padding: '0 14px',
+                                                    color: '#fff',
+                                                    textDecoration: 'none',
+                                                    borderTop: props.menuContent ? '1px solid rgba(255,255,255,0.2)' : 'none',
+                                                    cursor: 'pointer',
+                                                    fontSize: 14
+                                                }, children: t.logout }) })] }) })] })) : (
                     /* 未登录：显示登录按钮 */
                     (0, jsx_runtime_1.jsx)("button", { style: {
                             height: 32,

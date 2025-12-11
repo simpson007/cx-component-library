@@ -509,40 +509,45 @@ Vue 使用 `#actions` 插槽，React 使用 children：
 
 ## 自定义下拉菜单
 
-下拉菜单默认包含以下选项（登录后显示）：
-- 教师后台（需要 hasRoles=true）
-- 管理后台（需要 hasRoles=true）
-- 账户
-- 退出登录
-
-你可以通过 `#menu` 插槽（Vue）或 `menuContent` prop（React）完全自定义菜单内容：
+下拉菜单默认只包含"退出登录"选项。你可以通过 `#menu` 插槽（Vue）或 `menuContent` prop（React）在"退出登录"前面添加自定义菜单项：
 
 ```vue
-<!-- Vue：自定义下拉菜单 -->
+<!-- Vue：在退出登录前添加自定义菜单项 -->
 <SharedHeader ...>
   <template #menu>
-    <ul>
-      <li><a href="/profile">个人中心</a></li>
-      <li><a href="/settings">设置</a></li>
-      <li><a href="javascript:void(0)" @click="handleLogout">退出</a></li>
-    </ul>
+    <li><a href="/teacher">教师后台</a></li>
+    <li><a href="/account">账户设置</a></li>
   </template>
 </SharedHeader>
 ```
 
 ```tsx
-// React：自定义下拉菜单
+// React：在退出登录前添加自定义菜单项
 <SharedHeader
   menuContent={
-    <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-      <li><a href="/profile">个人中心</a></li>
-      <li><a href="/settings">设置</a></li>
-      <li><a href="#" onClick={handleLogout}>退出</a></li>
-    </ul>
+    <>
+      <li><a href="/teacher" style={menuItemStyle}>教师后台</a></li>
+      <li><a href="/account" style={menuItemStyle}>账户设置</a></li>
+    </>
   }
   ...
 />
+
+// 菜单项样式（可选）
+const menuItemStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  height: 32,
+  padding: '0 14px',
+  color: '#fff',
+  textDecoration: 'none',
+  borderTop: '1px solid rgba(255,255,255,0.2)',
+  cursor: 'pointer',
+  fontSize: 14
+}
 ```
+
+> 注意：退出登录选项始终显示在菜单最后，无需手动添加。
 
 ## 自定义文案
 

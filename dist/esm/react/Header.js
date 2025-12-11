@@ -1,4 +1,4 @@
-import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useState, useMemo, useCallback } from 'react';
 import { HeaderController, headerStyles } from '../components/Header';
 // 登录弹框样式
@@ -223,7 +223,17 @@ export const SharedHeader = (props) => {
                                     overflow: 'hidden',
                                     transition: 'height 0.5s',
                                     height: isUserInfoShow ? 'auto' : 0
-                                }, children: props.menuContent || (_jsxs("ul", { style: { listStyle: 'none', margin: 0, padding: 0 }, children: [props.hasRoles && (_jsxs(_Fragment, { children: [_jsx("li", { children: _jsx("a", { href: "/teacher", style: headerStyles.menuItem, children: t.teacherDashboard }) }), _jsx("li", { children: _jsx("a", { href: "/services/admin/home", style: headerStyles.menuItem, children: t.background }) })] })), _jsx("li", { children: _jsx("a", { href: "/account", style: headerStyles.menuItem, children: t.account }) }), _jsx("li", { children: _jsx("a", { href: "javascript:void(0)", onClick: (e) => { e.preventDefault(); props.onLogout?.(); }, style: headerStyles.menuItem, children: t.logout }) })] })) })] })) : (
+                                }, children: _jsxs("ul", { style: { listStyle: 'none', margin: 0, padding: 0 }, children: [props.menuContent, _jsx("li", { children: _jsx("a", { href: "javascript:void(0)", onClick: (e) => { e.preventDefault(); props.onLogout?.(); }, style: {
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    height: 32,
+                                                    padding: '0 14px',
+                                                    color: '#fff',
+                                                    textDecoration: 'none',
+                                                    borderTop: props.menuContent ? '1px solid rgba(255,255,255,0.2)' : 'none',
+                                                    cursor: 'pointer',
+                                                    fontSize: 14
+                                                }, children: t.logout }) })] }) })] })) : (
                     /* 未登录：显示登录按钮 */
                     _jsx("button", { style: {
                             height: 32,
