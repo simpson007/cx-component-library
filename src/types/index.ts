@@ -33,16 +33,12 @@ export interface HeaderProps {
   userInfo: UserInfo
   schoolInfo: SchoolInfo
   isLogin: boolean
-  hasRoles?: boolean
   onLogout?: () => void
   onGoHome?: () => void
   translations?: HeaderTranslations
 }
 
 export interface HeaderTranslations {
-  teacherDashboard?: string
-  background?: string
-  account?: string
   logout?: string
   login?: string
 }

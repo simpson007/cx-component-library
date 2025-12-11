@@ -286,7 +286,6 @@ export const SharedHeader = {
     userInfo: { type: Object, required: true },
     schoolInfo: { type: Object, default: () => ({}) },
     isLogin: { type: Boolean, default: false },
-    hasRoles: { type: Boolean, default: false },
     loading: { type: Boolean, default: false },
     translations: { type: Object, default: () => ({}) },
     loginApi: { type: String, default: '/api/v1/school/login' },
@@ -308,9 +307,6 @@ export const SharedHeader = {
       const self = this as any
       const trans = self.translations || {}
       return {
-        teacherDashboard: trans.teacherDashboard || '教师后台',
-        background: trans.background || '管理后台',
-        account: trans.account || '账户',
         logout: trans.logout || '退出登录',
         login: trans.login || '登录'
       }
