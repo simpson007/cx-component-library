@@ -2,6 +2,13 @@
 
 跨团队、跨技术栈复用的 Header 组件和 API 库。
 
+## 特性
+
+- 内置登录弹框，无需用户实现登录逻辑
+- 支持 Vue 2/3、React、纯 JS 项目
+- 登录成功自动存储 token 到 cookie
+- 支持自定义操作按钮（通过插槽/children）
+
 ## 安装
 
 通过 Git 仓库安装（推荐）：
@@ -9,6 +16,7 @@
 ```bash
 # HTTPS 方式
 npm install git+https://github.com/simpson007/cx-component-library.git
+```
 
 或在 package.json 中直接添加：
 
@@ -151,6 +159,8 @@ export default defineConfig({
 
 ### 组件使用
 
+> 登录弹框已内置，点击"登录"菜单会自动弹出登录框，登录成功后触发 `@login-success` 事件。
+
 ```vue
 <template>
   <SharedHeader
@@ -158,8 +168,9 @@ export default defineConfig({
     :school-info="schoolInfo"
     :is-login="isLogin"
     :has-roles="hasRoles"
+    :base-url="baseUrl"
     @logout="handleLogout"
-    @login="handleLogin"
+    @login-success="handleLoginSuccess"
     @go-home="handleGoHome"
   >
     <template #actions>
@@ -177,6 +188,7 @@ const userInfo = ref({ id: '', name: '游客' })
 const schoolInfo = ref({ logo: '', name: '' })
 const isLogin = ref(false)
 const hasRoles = ref(false)
+const baseUrl = 'https://cx.istemedu.com'
 
 function getCookie(name) {
   const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
@@ -206,8 +218,11 @@ function handleLogout() {
   userInfo.value = { id: '', name: '游客' }
 }
 
-function handleLogin() {
-  // 打开登录弹框或跳转登录页
+// 登录成功回调（登录弹框内置，无需手动实现）
+function handleLoginSuccess(userData) {
+  userInfo.value = userData
+  isLogin.value = true
+  hasRoles.value = true
 }
 
 function handleGoHome() {
@@ -242,8 +257,9 @@ function handleEdit() {
     :school-info="schoolInfo"
     :is-login="isLogin"
     :has-roles="hasRoles"
+    :base-url="baseUrl"
     @logout="handleLogout"
-    @login="handleLogin"
+    @login-success="handleLoginSuccess"
     @go-home="handleGoHome"
   >
     <template #actions>
@@ -263,7 +279,8 @@ export default {
       userInfo: { id: '', name: '游客' },
       schoolInfo: { logo: '', name: '' },
       isLogin: false,
-      hasRoles: false
+      hasRoles: false,
+      baseUrl: 'https://cx.istemedu.com'
     }
   },
   async mounted() {
@@ -286,7 +303,11 @@ export default {
       this.isLogin = false
       this.userInfo = { id: '', name: '游客' }
     },
-    handleLogin() {},
+    handleLoginSuccess(userData) {
+      this.userInfo = userData
+      this.isLogin = true
+      this.hasRoles = true
+    },
     handleGoHome() { window.location.href = '/' },
     handleEdit() { console.log('编辑') },
     getCookie(name) {
@@ -300,14 +321,18 @@ export default {
 
 ## React 组件使用
 
+> 登录弹框已内置，点击"登录"菜单会自动弹出登录框，登录成功后触发 `onLoginSuccess` 回调。
+
 ```tsx
 import { useEffect, useState } from 'react'
 import { SharedHeader } from 'cx-component-library/react'
 import { initHttp, getSchoolInfo, getUserInfo } from 'cx-component-library/api'
 
+const BASE_URL = 'https://cx.istemedu.com'
+
 // 初始化（在应用入口调用一次）
 initHttp({
-  baseUrl: 'https://cx.istemedu.com',
+  baseUrl: BASE_URL,
   getToken: () => getCookie('token')
 })
 
@@ -343,14 +368,21 @@ function App() {
     setUserInfo({ id: '', name: '游客' })
   }
 
+  // 登录成功回调（登录弹框内置，无需手动实现）
+  const handleLoginSuccess = (userData: any) => {
+    setUserInfo(userData)
+    setIsLogin(true)
+  }
+
   return (
     <SharedHeader
       userInfo={userInfo}
       schoolInfo={schoolInfo}
       isLogin={isLogin}
       hasRoles={true}
+      baseUrl={BASE_URL}
       onLogout={handleLogout}
-      onLogin={() => console.log('login')}
+      onLoginSuccess={handleLoginSuccess}
       onGoHome={() => window.location.href = '/'}
     >
       <button className="header-btn" onClick={() => console.log('编辑')}>编辑</button>
@@ -417,21 +449,25 @@ const file = dataURLtoFile(dataUrl, 'image.png')
 
 ## Header 组件 Props
 
-| 属性 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `userInfo` | `{ id: string, name: string }` | 是 | 用户信息 |
-| `schoolInfo` | `{ logo: string, name: string }` | 是 | 学校信息 |
-| `isLogin` | `boolean` | 是 | 是否已登录 |
-| `hasRoles` | `boolean` | 否 | 是否有管理权限（显示教师后台等菜单） |
-| `translations` | `object` | 否 | 自定义文案 |
+| 属性 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `userInfo` | `{ id: string, name: string }` | 是 | - | 用户信息 |
+| `schoolInfo` | `{ logo: string, name: string }` | 是 | - | 学校信息 |
+| `isLogin` | `boolean` | 是 | - | 是否已登录 |
+| `hasRoles` | `boolean` | 否 | `false` | 是否有管理权限（显示教师后台等菜单） |
+| `baseUrl` | `string` | 否 | `''` | API 基础地址（用于登录请求） |
+| `loginApi` | `string` | 否 | `/api/v1/school/login` | 登录接口路径 |
+| `translations` | `object` | 否 | - | 自定义文案 |
 
 ## Header 组件 Events
 
 | 事件（Vue） | 事件（React） | 说明 |
 |-------------|---------------|------|
 | `@logout` | `onLogout` | 点击退出登录 |
-| `@login` | `onLogin` | 点击登录 |
+| `@login-success` | `onLoginSuccess` | 登录成功，参数为用户数据 |
 | `@go-home` | `onGoHome` | 点击 Logo |
+
+> 注意：登录弹框已内置，点击菜单中的"登录"会自动弹出登录框。登录成功后会自动将 token 存入 cookie，并触发 `login-success` 事件。
 
 ## 自定义操作按钮
 

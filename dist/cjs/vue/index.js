@@ -1,7 +1,6 @@
 "use strict";
 // Vue 组件导出
-// 由于 Vue SFC 需要特殊构建工具，这里导出组件配置对象
-// 用户可以直接使用或通过 defineComponent 包装
+// 内置登录弹框的 Header 组件
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.styles = exports.SharedHeader = exports.headerCss = void 0;
 exports.install = install;
@@ -91,6 +90,127 @@ exports.headerCss = `
 .shared-header .user-menu-glyph.show {
   transform: rotateX(180deg);
 }
+
+/* 登录弹框样式 */
+.shared-header .login-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s;
+}
+.shared-header .login-modal-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+.shared-header .login-modal {
+  background: #fff;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-20px);
+  transition: transform 0.3s;
+}
+.shared-header .login-modal-overlay.show .login-modal {
+  transform: translateY(0);
+}
+.shared-header .login-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.shared-header .login-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+.shared-header .login-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  line-height: 1;
+}
+.shared-header .login-modal-close:hover {
+  color: #333;
+}
+.shared-header .login-modal-body {
+  padding: 24px 20px;
+}
+.shared-header .login-form-group {
+  margin-bottom: 16px;
+}
+.shared-header .login-form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #333;
+}
+.shared-header .login-form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.shared-header .login-form-group input:focus {
+  outline: none;
+  border-color: #edae24;
+}
+.shared-header .login-error {
+  color: #e74c3c;
+  font-size: 13px;
+  margin-bottom: 12px;
+  display: none;
+}
+.shared-header .login-error.show {
+  display: block;
+}
+.shared-header .login-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.shared-header .login-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.shared-header .login-btn-cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+.shared-header .login-btn-cancel:hover {
+  background: #eee;
+}
+.shared-header .login-btn-submit {
+  background: #edae24;
+  color: #fff;
+}
+.shared-header .login-btn-submit:hover {
+  background: #d9a020;
+}
+.shared-header .login-btn-submit:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
 `;
 exports.styles = exports.headerCss;
 // 注入样式
@@ -111,12 +231,21 @@ exports.SharedHeader = {
         schoolInfo: { type: Object, default: () => ({}) },
         isLogin: { type: Boolean, default: false },
         hasRoles: { type: Boolean, default: false },
-        translations: { type: Object, default: () => ({}) }
+        translations: { type: Object, default: () => ({}) },
+        loginApi: { type: String, default: '/api/v1/school/login' },
+        baseUrl: { type: String, default: '' }
     },
-    emits: ['logout', 'login', 'go-home'],
+    emits: ['logout', 'login-success', 'go-home'],
     data() {
         return {
-            isUserInfoShow: false
+            isUserInfoShow: false,
+            showLoginModal: false,
+            loginLoading: false,
+            loginError: '',
+            loginForm: {
+                username: '',
+                password: ''
+            }
         };
     },
     computed: {
@@ -143,13 +272,69 @@ exports.SharedHeader = {
             ;
             this.$emit('logout');
         },
-        handleLogin() {
-            ;
-            this.$emit('login');
+        openLoginModal() {
+            const self = this;
+            self.showLoginModal = true;
+            self.loginError = '';
+            self.loginForm = { username: '', password: '' };
+            self.isUserInfoShow = false;
+        },
+        closeLoginModal() {
+            const self = this;
+            self.showLoginModal = false;
+            self.loginError = '';
+            self.loginLoading = false;
+        },
+        async submitLogin() {
+            const self = this;
+            if (!self.loginForm.username) {
+                self.loginError = '请输入用户名';
+                return;
+            }
+            if (!self.loginForm.password) {
+                self.loginError = '请输入密码';
+                return;
+            }
+            self.loginLoading = true;
+            self.loginError = '';
+            try {
+                const formData = new FormData();
+                formData.append('username', self.loginForm.username);
+                formData.append('password', self.loginForm.password);
+                const url = self.baseUrl + self.loginApi;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.head?.code === '1000' && data.body) {
+                    // 登录成功，存储 token 到 cookie
+                    const token = data.body.token;
+                    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
+                    document.cookie = 'token=' + token + '; expires=' + expires + '; path=/';
+                    self.closeLoginModal();
+                    self.$emit('login-success', data.body);
+                }
+                else {
+                    self.loginError = data.head?.msg || '登录失败';
+                }
+            }
+            catch (error) {
+                self.loginError = error.message || '网络错误，请重试';
+            }
+            finally {
+                self.loginLoading = false;
+            }
         },
         handleGoHome() {
             ;
             this.$emit('go-home');
+        },
+        handleKeydown(e) {
+            if (e.key === 'Enter') {
+                ;
+                this.submitLogin();
+            }
         }
     },
     template: `
@@ -177,8 +362,35 @@ exports.SharedHeader = {
           <li v-if="hasRoles"><a href="/services/admin/home">{{ t.background }}</a></li>
           <li v-if="isLogin"><a href="/account">{{ t.account }}</a></li>
           <li v-if="isLogin"><a href="javascript:void(0)" @click.prevent="handleLogout">{{ t.logout }}</a></li>
-          <li v-if="!isLogin"><a href="javascript:void(0)" @click.prevent="handleLogin">{{ t.login }}</a></li>
+          <li v-if="!isLogin"><a href="javascript:void(0)" @click.prevent="openLoginModal">{{ t.login }}</a></li>
         </ul>
+      </div>
+      
+      <!-- 登录弹框 -->
+      <div class="login-modal-overlay" :class="{ show: showLoginModal }" @click.self="closeLoginModal">
+        <div class="login-modal">
+          <div class="login-modal-header">
+            <h3>用户登录</h3>
+            <button class="login-modal-close" @click="closeLoginModal">&times;</button>
+          </div>
+          <div class="login-modal-body">
+            <div class="login-error" :class="{ show: loginError }">{{ loginError }}</div>
+            <div class="login-form-group">
+              <label>用户名</label>
+              <input type="text" v-model="loginForm.username" placeholder="请输入用户名" @keydown="handleKeydown" />
+            </div>
+            <div class="login-form-group">
+              <label>密码</label>
+              <input type="password" v-model="loginForm.password" placeholder="请输入密码" @keydown="handleKeydown" />
+            </div>
+          </div>
+          <div class="login-modal-footer">
+            <button class="login-btn login-btn-cancel" @click="closeLoginModal">取消</button>
+            <button class="login-btn login-btn-submit" @click="submitLogin" :disabled="loginLoading">
+              {{ loginLoading ? '登录中...' : '登录' }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   `
