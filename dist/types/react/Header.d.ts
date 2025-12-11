@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react';
 import type { HeaderProps } from '../types';
 interface SharedHeaderProps extends HeaderProps {
     children?: ReactNode;
+    menuContent?: ReactNode;
     loginApi?: string;
     baseUrl?: string;
     loading?: boolean;

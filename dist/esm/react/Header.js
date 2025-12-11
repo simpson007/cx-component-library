@@ -208,23 +208,7 @@ export const SharedHeader = (props) => {
             submitLogin();
         }
     }, [submitLogin]);
-    // 构建菜单项
-    const menuItems = useMemo(() => {
-        const items = [];
-        if (props.hasRoles) {
-            items.push({ label: t.teacherDashboard, href: '/teacher' });
-            items.push({ label: t.background, href: '/services/admin/home' });
-        }
-        if (props.isLogin) {
-            items.push({ label: t.account, href: '/account' });
-            items.push({ label: t.logout, action: props.onLogout });
-        }
-        else {
-            items.push({ label: t.login, action: openLoginModal });
-        }
-        return items;
-    }, [props.hasRoles, props.isLogin, props.onLogout, t, openLoginModal]);
-    return (_jsxs("div", { style: { position: 'relative', backgroundColor: '#edae24', height: 50, display: 'flex', alignItems: 'center' }, children: [_jsx("div", { style: headerStyles.logo, onClick: controller.handleGoHome.bind(controller), children: loading ? (_jsxs("div", { style: headerStyles.logoImage, children: [_jsx("div", { style: { ...skeletonStyles.base, ...skeletonStyles.logo } }), _jsx("div", { style: { ...skeletonStyles.base, ...skeletonStyles.title } })] })) : props.schoolInfo && Object.keys(props.schoolInfo).length > 0 ? (_jsxs("div", { style: headerStyles.logoImage, children: [_jsx("img", { style: headerStyles.logoImg, src: props.schoolInfo.logo, alt: "logo" }), _jsx("div", { style: headerStyles.logoTitle, children: props.schoolInfo.name })] })) : null }), !loading && props.children && (_jsx("div", { style: { position: 'absolute', right: 116, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 10 }, children: props.children })), loading ? (_jsx("div", { style: { ...skeletonStyles.base, ...skeletonStyles.user } })) : (_jsxs(_Fragment, { children: [_jsxs("div", { style: headerStyles.userName, onClick: toggleUserInfo, children: [_jsx("i", { className: "fa fa-user-o", style: { marginRight: 4 } }), _jsx("span", { children: props.userInfo.name }), _jsx("span", { style: {
+    return (_jsxs("div", { style: { position: 'relative', backgroundColor: '#edae24', height: 50, display: 'flex', alignItems: 'center' }, children: [_jsx("div", { style: headerStyles.logo, onClick: controller.handleGoHome.bind(controller), children: loading ? (_jsxs("div", { style: headerStyles.logoImage, children: [_jsx("div", { style: { ...skeletonStyles.base, ...skeletonStyles.logo } }), _jsx("div", { style: { ...skeletonStyles.base, ...skeletonStyles.title } })] })) : props.schoolInfo && Object.keys(props.schoolInfo).length > 0 ? (_jsxs("div", { style: headerStyles.logoImage, children: [_jsx("img", { style: headerStyles.logoImg, src: props.schoolInfo.logo, alt: "logo" }), _jsx("div", { style: headerStyles.logoTitle, children: props.schoolInfo.name })] })) : null }), !loading && props.children && (_jsx("div", { style: { position: 'absolute', right: 116, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 10 }, children: props.children })), loading ? (_jsx("div", { style: { ...skeletonStyles.base, ...skeletonStyles.user } })) : props.isLogin ? (_jsxs(_Fragment, { children: [_jsxs("div", { style: headerStyles.userName, onClick: toggleUserInfo, children: [_jsx("i", { className: "fa fa-user-o", style: { marginRight: 4 } }), _jsx("span", { children: props.userInfo.name }), _jsx("span", { style: {
                                     display: 'inline-block',
                                     transition: 'transform 0.5s',
                                     transform: isUserInfoShow ? 'rotateX(180deg)' : 'none',
@@ -233,7 +217,24 @@ export const SharedHeader = (props) => {
                                 }, children: "\u25BC" })] }), _jsx("div", { style: {
                             ...headerStyles.userInfo,
                             height: isUserInfoShow ? 'auto' : 0
-                        }, children: _jsx("ul", { style: { listStyle: 'none', margin: 0, padding: 0 }, children: menuItems.map((item, index) => (_jsx("li", { children: item.href ? (_jsx("a", { href: item.href, style: headerStyles.menuItem, children: item.label })) : (_jsx("a", { href: "javascript:void(0)", onClick: (e) => { e.preventDefault(); item.action?.(); }, style: headerStyles.menuItem, children: item.label })) }, index))) }) })] })), showLoginModal && (_jsx("div", { style: modalStyles.overlay, onClick: (e) => e.target === e.currentTarget && closeLoginModal(), children: _jsxs("div", { style: modalStyles.modal, children: [_jsxs("div", { style: modalStyles.header, children: [_jsx("h3", { style: modalStyles.title, children: "\u7528\u6237\u767B\u5F55" }), _jsx("button", { style: modalStyles.closeBtn, onClick: closeLoginModal, children: "\u00D7" })] }), _jsxs("div", { style: modalStyles.body, children: [loginError && _jsx("div", { style: modalStyles.error, children: loginError }), _jsxs("div", { style: modalStyles.formGroup, children: [_jsx("label", { style: modalStyles.label, children: "\u7528\u6237\u540D" }), _jsx("input", { type: "text", style: modalStyles.input, placeholder: "\u8BF7\u8F93\u5165\u7528\u6237\u540D", value: loginForm.username, onChange: (e) => setLoginForm(prev => ({ ...prev, username: e.target.value })), onKeyDown: handleKeyDown })] }), _jsxs("div", { style: modalStyles.formGroup, children: [_jsx("label", { style: modalStyles.label, children: "\u5BC6\u7801" }), _jsx("input", { type: "password", style: modalStyles.input, placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801", value: loginForm.password, onChange: (e) => setLoginForm(prev => ({ ...prev, password: e.target.value })), onKeyDown: handleKeyDown })] })] }), _jsxs("div", { style: modalStyles.footer, children: [_jsx("button", { style: { ...modalStyles.btn, ...modalStyles.btnCancel }, onClick: closeLoginModal, children: "\u53D6\u6D88" }), _jsx("button", { style: {
+                        }, children: props.menuContent || (_jsxs("ul", { style: { listStyle: 'none', margin: 0, padding: 0 }, children: [props.hasRoles && (_jsxs(_Fragment, { children: [_jsx("li", { children: _jsx("a", { href: "/teacher", style: headerStyles.menuItem, children: t.teacherDashboard }) }), _jsx("li", { children: _jsx("a", { href: "/services/admin/home", style: headerStyles.menuItem, children: t.background }) })] })), _jsx("li", { children: _jsx("a", { href: "/account", style: headerStyles.menuItem, children: t.account }) }), _jsx("li", { children: _jsx("a", { href: "javascript:void(0)", onClick: (e) => { e.preventDefault(); props.onLogout?.(); }, style: headerStyles.menuItem, children: t.logout }) })] })) })] })) : (
+            /* 未登录：显示登录按钮 */
+            _jsx("button", { style: {
+                    position: 'absolute',
+                    right: 20,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    height: 32,
+                    backgroundColor: '#0a3055',
+                    borderRadius: 3,
+                    padding: '0 14px',
+                    fontSize: 14,
+                    lineHeight: '32px',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    border: 'none',
+                    zIndex: 1998
+                }, onClick: openLoginModal, children: t.login })), showLoginModal && (_jsx("div", { style: modalStyles.overlay, onClick: (e) => e.target === e.currentTarget && closeLoginModal(), children: _jsxs("div", { style: modalStyles.modal, children: [_jsxs("div", { style: modalStyles.header, children: [_jsx("h3", { style: modalStyles.title, children: "\u7528\u6237\u767B\u5F55" }), _jsx("button", { style: modalStyles.closeBtn, onClick: closeLoginModal, children: "\u00D7" })] }), _jsxs("div", { style: modalStyles.body, children: [loginError && _jsx("div", { style: modalStyles.error, children: loginError }), _jsxs("div", { style: modalStyles.formGroup, children: [_jsx("label", { style: modalStyles.label, children: "\u7528\u6237\u540D" }), _jsx("input", { type: "text", style: modalStyles.input, placeholder: "\u8BF7\u8F93\u5165\u7528\u6237\u540D", value: loginForm.username, onChange: (e) => setLoginForm(prev => ({ ...prev, username: e.target.value })), onKeyDown: handleKeyDown })] }), _jsxs("div", { style: modalStyles.formGroup, children: [_jsx("label", { style: modalStyles.label, children: "\u5BC6\u7801" }), _jsx("input", { type: "password", style: modalStyles.input, placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801", value: loginForm.password, onChange: (e) => setLoginForm(prev => ({ ...prev, password: e.target.value })), onKeyDown: handleKeyDown })] })] }), _jsxs("div", { style: modalStyles.footer, children: [_jsx("button", { style: { ...modalStyles.btn, ...modalStyles.btnCancel }, onClick: closeLoginModal, children: "\u53D6\u6D88" }), _jsx("button", { style: {
                                         ...modalStyles.btn,
                                         ...(loginLoading ? modalStyles.btnDisabled : modalStyles.btnSubmit)
                                     }, onClick: submitLogin, disabled: loginLoading, children: loginLoading ? '登录中...' : '登录' })] })] }) }))] }));

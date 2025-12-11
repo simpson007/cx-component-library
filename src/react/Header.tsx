@@ -4,6 +4,7 @@ import type { HeaderProps } from '../types'
 
 interface SharedHeaderProps extends HeaderProps {
   children?: ReactNode
+  menuContent?: ReactNode
   loginApi?: string
   baseUrl?: string
   loading?: boolean
@@ -231,23 +232,7 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
     }
   }, [submitLogin])
 
-  // 构建菜单项
-  const menuItems = useMemo(() => {
-    const items: Array<{ label: string; href?: string; action?: () => void }> = []
-    
-    if (props.hasRoles) {
-      items.push({ label: t.teacherDashboard, href: '/teacher' })
-      items.push({ label: t.background, href: '/services/admin/home' })
-    }
-    if (props.isLogin) {
-      items.push({ label: t.account, href: '/account' })
-      items.push({ label: t.logout, action: props.onLogout })
-    } else {
-      items.push({ label: t.login, action: openLoginModal })
-    }
-    
-    return items
-  }, [props.hasRoles, props.isLogin, props.onLogout, t, openLoginModal])
+
 
   return (
     <div style={{ position: 'relative', backgroundColor: '#edae24', height: 50, display: 'flex', alignItems: 'center' }}>
@@ -277,11 +262,12 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
         </div>
       )}
 
-      {/* User Name / Skeleton */}
+      {/* User Name / Login Button / Skeleton */}
       {loading ? (
         <div style={{ ...skeletonStyles.base, ...skeletonStyles.user }} />
-      ) : (
+      ) : props.isLogin ? (
         <>
+          {/* 已登录：显示用户名+下拉箭头 */}
           <div style={headerStyles.userName} onClick={toggleUserInfo}>
             <i className="fa fa-user-o" style={{ marginRight: 4 }} />
             <span>{props.userInfo.name}</span>
@@ -305,27 +291,51 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
               height: isUserInfoShow ? 'auto' : 0
             }}
           >
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-              {menuItems.map((item, index) => (
-                <li key={index}>
-                  {item.href ? (
-                    <a href={item.href} style={headerStyles.menuItem}>
-                      {item.label}
-                    </a>
-                  ) : (
-                    <a 
-                      href="javascript:void(0)" 
-                      onClick={(e) => { e.preventDefault(); item.action?.() }}
-                      style={headerStyles.menuItem}
-                    >
-                      {item.label}
-                    </a>
-                  )}
+            {props.menuContent || (
+              <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                {props.hasRoles && (
+                  <>
+                    <li><a href="/teacher" style={headerStyles.menuItem}>{t.teacherDashboard}</a></li>
+                    <li><a href="/services/admin/home" style={headerStyles.menuItem}>{t.background}</a></li>
+                  </>
+                )}
+                <li><a href="/account" style={headerStyles.menuItem}>{t.account}</a></li>
+                <li>
+                  <a 
+                    href="javascript:void(0)" 
+                    onClick={(e) => { e.preventDefault(); props.onLogout?.() }}
+                    style={headerStyles.menuItem}
+                  >
+                    {t.logout}
+                  </a>
                 </li>
-              ))}
-            </ul>
+              </ul>
+            )}
           </div>
         </>
+      ) : (
+        /* 未登录：显示登录按钮 */
+        <button 
+          style={{
+            position: 'absolute',
+            right: 20,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            height: 32,
+            backgroundColor: '#0a3055',
+            borderRadius: 3,
+            padding: '0 14px',
+            fontSize: 14,
+            lineHeight: '32px',
+            color: '#fff',
+            cursor: 'pointer',
+            border: 'none',
+            zIndex: 1998
+          }}
+          onClick={openLoginModal}
+        >
+          {t.login}
+        </button>
       )}
 
       {/* 登录弹框 */}

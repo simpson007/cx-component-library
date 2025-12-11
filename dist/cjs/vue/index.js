@@ -59,6 +59,25 @@ exports.headerCss = `
   gap: 4px;
   z-index: 1998;
 }
+.shared-header .header-login-btn {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 32px;
+  background-color: #0a3055;
+  border-radius: 3px;
+  padding: 0 14px;
+  font-size: 14px;
+  line-height: 32px;
+  color: #fff;
+  cursor: pointer;
+  border: none;
+  z-index: 1998;
+}
+.shared-header .header-login-btn:hover {
+  background-color: #0d3a6a;
+}
 .shared-header .header-user-info {
   position: absolute;
   top: 50px;
@@ -73,14 +92,17 @@ exports.headerCss = `
   margin: 0;
   padding: 0;
 }
-.shared-header .header-user-info a {
+.shared-header .header-user-info a,
+.shared-header .header-user-info .menu-item {
   display: block;
   padding: 10px 16px;
   color: #fff;
   text-decoration: none;
   border-top: 1px solid rgba(255,255,255,0.2);
+  cursor: pointer;
 }
-.shared-header .header-user-info a:hover {
+.shared-header .header-user-info a:hover,
+.shared-header .header-user-info .menu-item:hover {
   background-color: #0d3a6a;
 }
 .shared-header .user-menu-glyph {
@@ -295,7 +317,10 @@ exports.SharedHeader = {
     },
     methods: {
         toggleUserInfo() {
-            this.isUserInfoShow = !this.isUserInfoShow;
+            const self = this;
+            if (self.isLogin) {
+                self.isUserInfoShow = !self.isUserInfoShow;
+            }
         },
         handleLogout() {
             this.$emit('logout');
@@ -382,21 +407,27 @@ exports.SharedHeader = {
       <template v-if="loading">
         <div class="skeleton skeleton-user"></div>
       </template>
-      <template v-else>
+      <template v-else-if="isLogin">
+        <!-- 已登录：显示用户名+下拉箭头 -->
         <div class="header-user-name" @click="toggleUserInfo">
           <i class="fa fa-user-o"></i>
           <span>{{ userInfo?.name || '游客' }}</span>
           <span class="user-menu-glyph" :class="{ show: isUserInfoShow }">▼</span>
         </div>
         <div class="header-user-info" :style="{ height: isUserInfoShow ? 'auto' : '0' }">
-          <ul>
-            <li v-if="hasRoles"><a href="/teacher">{{ t.teacherDashboard }}</a></li>
-            <li v-if="hasRoles"><a href="/services/admin/home">{{ t.background }}</a></li>
-            <li v-if="isLogin"><a href="/account">{{ t.account }}</a></li>
-            <li v-if="isLogin"><a href="javascript:void(0)" @click.prevent="handleLogout">{{ t.logout }}</a></li>
-            <li v-if="!isLogin"><a href="javascript:void(0)" @click.prevent="openLoginModal">{{ t.login }}</a></li>
-          </ul>
+          <slot name="menu">
+            <ul>
+              <li v-if="hasRoles"><a href="/teacher">{{ t.teacherDashboard }}</a></li>
+              <li v-if="hasRoles"><a href="/services/admin/home">{{ t.background }}</a></li>
+              <li><a href="/account">{{ t.account }}</a></li>
+              <li><a href="javascript:void(0)" @click.prevent="handleLogout">{{ t.logout }}</a></li>
+            </ul>
+          </slot>
         </div>
+      </template>
+      <template v-else>
+        <!-- 未登录：显示登录按钮 -->
+        <button class="header-login-btn" @click="openLoginModal">{{ t.login }}</button>
       </template>
 
       <!-- 登录弹框 -->

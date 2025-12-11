@@ -476,17 +476,23 @@ const file = dataURLtoFile(dataUrl, 'image.png')
 | `@login-success` | `onLoginSuccess` | 登录成功，参数为用户数据 |
 | `@go-home` | `onGoHome` | 点击 Logo |
 
-> 注意：登录弹框已内置，点击菜单中的"登录"会自动弹出登录框。登录成功后会自动将 token 存入 cookie，并触发 `login-success` 事件。
+## 登录状态说明
+
+- 未登录时：显示"登录"按钮，点击直接弹出登录框
+- 已登录时：显示用户名+下拉箭头，点击展开下拉菜单
+
+登录成功后会自动将 token 存入 cookie，并触发 `login-success` 事件。
 
 ## 自定义操作按钮
 
-Vue 使用插槽，React 使用 children：
+Vue 使用 `#actions` 插槽，React 使用 children：
 
 ```vue
 <!-- Vue -->
 <SharedHeader ...>
   <template #actions>
-    <button>自定义按钮</button>
+    <button>编辑</button>
+    <button>分享</button>
   </template>
 </SharedHeader>
 ```
@@ -494,8 +500,46 @@ Vue 使用插槽，React 使用 children：
 ```tsx
 // React
 <SharedHeader ...>
-  <button>自定义按钮</button>
+  <button>编辑</button>
+  <button>分享</button>
 </SharedHeader>
+```
+
+## 自定义下拉菜单
+
+下拉菜单默认包含以下选项（登录后显示）：
+- 教师后台（需要 hasRoles=true）
+- 管理后台（需要 hasRoles=true）
+- 账户
+- 退出登录
+
+你可以通过 `#menu` 插槽（Vue）或 `menuContent` prop（React）完全自定义菜单内容：
+
+```vue
+<!-- Vue：自定义下拉菜单 -->
+<SharedHeader ...>
+  <template #menu>
+    <ul>
+      <li><a href="/profile">个人中心</a></li>
+      <li><a href="/settings">设置</a></li>
+      <li><a href="javascript:void(0)" @click="handleLogout">退出</a></li>
+    </ul>
+  </template>
+</SharedHeader>
+```
+
+```tsx
+// React：自定义下拉菜单
+<SharedHeader
+  menuContent={
+    <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+      <li><a href="/profile">个人中心</a></li>
+      <li><a href="/settings">设置</a></li>
+      <li><a href="#" onClick={handleLogout}>退出</a></li>
+    </ul>
+  }
+  ...
+/>
 ```
 
 ## 自定义文案
