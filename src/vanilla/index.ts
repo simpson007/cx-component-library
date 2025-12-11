@@ -3,6 +3,18 @@
 import { postSchoolLogin } from '../api/endpoints'
 import type { UserInfo, SchoolInfo, HeaderTranslations } from '../types'
 
+export interface MenuItem {
+  label: string
+  href?: string
+  onClick?: () => void
+}
+
+export interface ActionButton {
+  label: string
+  onClick?: () => void
+  className?: string
+}
+
 export interface VanillaHeaderOptions {
   container: HTMLElement | string
   userInfo?: UserInfo
@@ -10,6 +22,10 @@ export interface VanillaHeaderOptions {
   isLogin?: boolean
   loading?: boolean
   translations?: HeaderTranslations
+  /** 自定义操作按钮（显示在用户名/登录按钮左侧） */
+  actions?: ActionButton[]
+  /** 自定义下拉菜单项（显示在"退出登录"上方） */
+  menuItems?: MenuItem[]
   onLogout?: () => void
   onLoginSuccess?: (userData: any) => void
   onGoHome?: () => void
@@ -262,6 +278,28 @@ export class SharedHeader {
     this.render()
   }
 
+  private renderActions(): string {
+    const { actions } = this.options
+    if (!actions || actions.length === 0) return ''
+    return actions
+      .map(
+        (btn, i) =>
+          `<button class="header-login-btn ${btn.className || ''}" data-action="custom-action" data-index="${i}">${btn.label}</button>`
+      )
+      .join('')
+  }
+
+  private renderMenuItems(): string {
+    const { menuItems } = this.options
+    if (!menuItems || menuItems.length === 0) return ''
+    return menuItems
+      .map(
+        (item, i) =>
+          `<li><a href="${item.href || 'javascript:void(0)'}" data-action="custom-menu" data-index="${i}">${item.label}</a></li>`
+      )
+      .join('')
+  }
+
   private render() {
     const { userInfo, schoolInfo, isLogin, loading } = this.options
 
@@ -291,7 +329,7 @@ export class SharedHeader {
         `
             : `
           <div class="header-right">
-            <div class="header-actions"></div>
+            <div class="header-actions">${this.renderActions()}</div>
             ${
               isLogin
                 ? `
@@ -302,6 +340,7 @@ export class SharedHeader {
                 </div>
                 <div class="header-user-info" style="height: ${this.isUserInfoShow ? 'auto' : '0'}">
                   <ul>
+                    ${this.renderMenuItems()}
                     <li><a href="javascript:void(0)" data-action="logout">${this.t.logout}</a></li>
                   </ul>
                 </div>
@@ -383,6 +422,25 @@ export class SharedHeader {
         case 'submit-login':
           this.submitLogin()
           break
+        case 'custom-action': {
+          // 自定义操作按钮点击
+          const index = parseInt(actionEl.dataset.index || '0', 10)
+          this.options.actions?.[index]?.onClick?.()
+          break
+        }
+        case 'custom-menu': {
+          // 自定义菜单项点击
+          const index = parseInt(actionEl.dataset.index || '0', 10)
+          const menuItem = this.options.menuItems?.[index]
+          if (menuItem?.onClick) {
+            e.preventDefault()
+            this.isUserInfoShow = false
+            this.updateMenuState()
+            menuItem.onClick()
+          }
+          // 如果有 href 且没有 onClick，让浏览器正常跳转
+          break
+        }
         case 'stop':
           // 阻止冒泡到 overlay
           break

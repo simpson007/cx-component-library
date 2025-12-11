@@ -82,6 +82,7 @@ if (isSuperAdmin(userInfo)) {
 <script type="module">
 import { initHttp, getSchoolInfo, getUserInfo } from 'cx-component-library/api'
 import { SharedHeader } from 'cx-component-library/vanilla'
+import { isAdmin } from 'cx-component-library'
 
 // 初始化 HTTP
 initHttp({
@@ -101,12 +102,27 @@ const header = new SharedHeader({
   schoolInfo,
   isLogin,
   loading: true,
+  // 自定义操作按钮（显示在用户名/登录按钮左侧）
+  actions: [
+    { label: '编辑', onClick: () => console.log('编辑') },
+    { label: '分享', onClick: () => console.log('分享') }
+  ],
+  // 自定义下拉菜单项（显示在"退出登录"上方）
+  menuItems: [
+    { label: '管理后台', href: '/admin' },
+    { label: '个人设置', onClick: () => console.log('个人设置') }
+  ],
   onLogout: () => {
     document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/'
-    header.update({ isLogin: false, userInfo: { id: '', name: '游客' } })
+    header.update({ isLogin: false, userInfo: { id: '', name: '游客' }, menuItems: [] })
   },
   onLoginSuccess: (userData) => {
-    header.update({ isLogin: true, userInfo: userData })
+    // 根据用户角色动态设置菜单
+    const menuItems = []
+    if (isAdmin(userData)) {
+      menuItems.push({ label: '管理后台', href: '/admin' })
+    }
+    header.update({ isLogin: true, userInfo: userData, menuItems })
   },
   onGoHome: () => {
     window.location.href = '/'

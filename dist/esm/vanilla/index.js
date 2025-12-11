@@ -240,6 +240,22 @@ export class SharedHeader {
         Object.assign(this.options, options);
         this.render();
     }
+    renderActions() {
+        const { actions } = this.options;
+        if (!actions || actions.length === 0)
+            return '';
+        return actions
+            .map((btn, i) => `<button class="header-login-btn ${btn.className || ''}" data-action="custom-action" data-index="${i}">${btn.label}</button>`)
+            .join('');
+    }
+    renderMenuItems() {
+        const { menuItems } = this.options;
+        if (!menuItems || menuItems.length === 0)
+            return '';
+        return menuItems
+            .map((item, i) => `<li><a href="${item.href || 'javascript:void(0)'}" data-action="custom-menu" data-index="${i}">${item.label}</a></li>`)
+            .join('');
+    }
     render() {
         const { userInfo, schoolInfo, isLogin, loading } = this.options;
         this.container.innerHTML = `
@@ -265,7 +281,7 @@ export class SharedHeader {
         `
             : `
           <div class="header-right">
-            <div class="header-actions"></div>
+            <div class="header-actions">${this.renderActions()}</div>
             ${isLogin
                 ? `
               <div style="position: relative;">
@@ -275,6 +291,7 @@ export class SharedHeader {
                 </div>
                 <div class="header-user-info" style="height: ${this.isUserInfoShow ? 'auto' : '0'}">
                   <ul>
+                    ${this.renderMenuItems()}
                     <li><a href="javascript:void(0)" data-action="logout">${this.t.logout}</a></li>
                   </ul>
                 </div>
@@ -352,6 +369,25 @@ export class SharedHeader {
                 case 'submit-login':
                     this.submitLogin();
                     break;
+                case 'custom-action': {
+                    // 自定义操作按钮点击
+                    const index = parseInt(actionEl.dataset.index || '0', 10);
+                    this.options.actions?.[index]?.onClick?.();
+                    break;
+                }
+                case 'custom-menu': {
+                    // 自定义菜单项点击
+                    const index = parseInt(actionEl.dataset.index || '0', 10);
+                    const menuItem = this.options.menuItems?.[index];
+                    if (menuItem?.onClick) {
+                        e.preventDefault();
+                        this.isUserInfoShow = false;
+                        this.updateMenuState();
+                        menuItem.onClick();
+                    }
+                    // 如果有 href 且没有 onClick，让浏览器正常跳转
+                    break;
+                }
                 case 'stop':
                     // 阻止冒泡到 overlay
                     break;
