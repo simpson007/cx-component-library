@@ -1,5 +1,5 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useState, useMemo, useCallback } from 'react';
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import React, { useState, useMemo, useCallback } from 'react';
 import { HeaderController, headerStyles } from '../components/Header';
 // 登录弹框样式
 const modalStyles = {
@@ -95,8 +95,55 @@ const modalStyles = {
         cursor: 'not-allowed'
     }
 };
+// 骨架屏样式
+const skeletonStyles = {
+    base: {
+        background: 'rgba(255, 255, 255, 0.3)',
+        borderRadius: 4,
+        animation: 'skeleton-pulse 1.5s ease-in-out infinite'
+    },
+    logo: {
+        width: 36,
+        height: 36,
+        borderRadius: 4
+    },
+    title: {
+        width: 80,
+        height: 16,
+        marginLeft: 10
+    },
+    user: {
+        width: 70,
+        height: 32,
+        position: 'absolute',
+        right: 20,
+        top: '50%',
+        transform: 'translateY(-50%)',
+        borderRadius: 3
+    }
+};
+// 注入骨架屏动画样式
+let skeletonStyleInjected = false;
+function injectSkeletonStyle() {
+    if (skeletonStyleInjected || typeof document === 'undefined')
+        return;
+    const style = document.createElement('style');
+    style.textContent = `
+    @keyframes skeleton-pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+  `;
+    document.head.appendChild(style);
+    skeletonStyleInjected = true;
+}
 export const SharedHeader = (props) => {
-    const { loginApi = '/api/v1/school/login', baseUrl = '', onLoginSuccess } = props;
+    const { loginApi = '/api/v1/school/login', baseUrl = '', loading = false, onLoginSuccess } = props;
+    // 注入骨架屏动画样式
+    React.useEffect(() => {
+        injectSkeletonStyle();
+    }, []);
     const [isUserInfoShow, setIsUserInfoShow] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [loginLoading, setLoginLoading] = useState(false);
@@ -177,16 +224,16 @@ export const SharedHeader = (props) => {
         }
         return items;
     }, [props.hasRoles, props.isLogin, props.onLogout, t, openLoginModal]);
-    return (_jsxs("div", { style: { position: 'relative', backgroundColor: '#edae24', height: 50, display: 'flex', alignItems: 'center' }, children: [_jsx("div", { style: headerStyles.logo, onClick: controller.handleGoHome.bind(controller), children: props.schoolInfo && Object.keys(props.schoolInfo).length > 0 && (_jsxs("div", { style: headerStyles.logoImage, children: [_jsx("img", { style: headerStyles.logoImg, src: props.schoolInfo.logo, alt: "logo" }), _jsx("div", { style: headerStyles.logoTitle, children: props.schoolInfo.name })] })) }), props.children && (_jsx("div", { style: { position: 'absolute', right: 116, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 10 }, children: props.children })), _jsxs("div", { style: headerStyles.userName, onClick: toggleUserInfo, children: [_jsx("i", { className: "fa fa-user-o", style: { marginRight: 4 } }), _jsx("span", { children: props.userInfo.name }), _jsx("span", { style: {
-                            display: 'inline-block',
-                            transition: 'transform 0.5s',
-                            transform: isUserInfoShow ? 'rotateX(180deg)' : 'none',
-                            marginLeft: 4,
-                            fontSize: 12
-                        }, children: "\u25BC" })] }), _jsx("div", { style: {
-                    ...headerStyles.userInfo,
-                    height: isUserInfoShow ? 'auto' : 0
-                }, children: _jsx("ul", { style: { listStyle: 'none', margin: 0, padding: 0 }, children: menuItems.map((item, index) => (_jsx("li", { children: item.href ? (_jsx("a", { href: item.href, style: headerStyles.menuItem, children: item.label })) : (_jsx("a", { href: "javascript:void(0)", onClick: (e) => { e.preventDefault(); item.action?.(); }, style: headerStyles.menuItem, children: item.label })) }, index))) }) }), showLoginModal && (_jsx("div", { style: modalStyles.overlay, onClick: (e) => e.target === e.currentTarget && closeLoginModal(), children: _jsxs("div", { style: modalStyles.modal, children: [_jsxs("div", { style: modalStyles.header, children: [_jsx("h3", { style: modalStyles.title, children: "\u7528\u6237\u767B\u5F55" }), _jsx("button", { style: modalStyles.closeBtn, onClick: closeLoginModal, children: "\u00D7" })] }), _jsxs("div", { style: modalStyles.body, children: [loginError && _jsx("div", { style: modalStyles.error, children: loginError }), _jsxs("div", { style: modalStyles.formGroup, children: [_jsx("label", { style: modalStyles.label, children: "\u7528\u6237\u540D" }), _jsx("input", { type: "text", style: modalStyles.input, placeholder: "\u8BF7\u8F93\u5165\u7528\u6237\u540D", value: loginForm.username, onChange: (e) => setLoginForm(prev => ({ ...prev, username: e.target.value })), onKeyDown: handleKeyDown })] }), _jsxs("div", { style: modalStyles.formGroup, children: [_jsx("label", { style: modalStyles.label, children: "\u5BC6\u7801" }), _jsx("input", { type: "password", style: modalStyles.input, placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801", value: loginForm.password, onChange: (e) => setLoginForm(prev => ({ ...prev, password: e.target.value })), onKeyDown: handleKeyDown })] })] }), _jsxs("div", { style: modalStyles.footer, children: [_jsx("button", { style: { ...modalStyles.btn, ...modalStyles.btnCancel }, onClick: closeLoginModal, children: "\u53D6\u6D88" }), _jsx("button", { style: {
+    return (_jsxs("div", { style: { position: 'relative', backgroundColor: '#edae24', height: 50, display: 'flex', alignItems: 'center' }, children: [_jsx("div", { style: headerStyles.logo, onClick: controller.handleGoHome.bind(controller), children: loading ? (_jsxs("div", { style: headerStyles.logoImage, children: [_jsx("div", { style: { ...skeletonStyles.base, ...skeletonStyles.logo } }), _jsx("div", { style: { ...skeletonStyles.base, ...skeletonStyles.title } })] })) : props.schoolInfo && Object.keys(props.schoolInfo).length > 0 ? (_jsxs("div", { style: headerStyles.logoImage, children: [_jsx("img", { style: headerStyles.logoImg, src: props.schoolInfo.logo, alt: "logo" }), _jsx("div", { style: headerStyles.logoTitle, children: props.schoolInfo.name })] })) : null }), !loading && props.children && (_jsx("div", { style: { position: 'absolute', right: 116, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 10 }, children: props.children })), loading ? (_jsx("div", { style: { ...skeletonStyles.base, ...skeletonStyles.user } })) : (_jsxs(_Fragment, { children: [_jsxs("div", { style: headerStyles.userName, onClick: toggleUserInfo, children: [_jsx("i", { className: "fa fa-user-o", style: { marginRight: 4 } }), _jsx("span", { children: props.userInfo.name }), _jsx("span", { style: {
+                                    display: 'inline-block',
+                                    transition: 'transform 0.5s',
+                                    transform: isUserInfoShow ? 'rotateX(180deg)' : 'none',
+                                    marginLeft: 4,
+                                    fontSize: 12
+                                }, children: "\u25BC" })] }), _jsx("div", { style: {
+                            ...headerStyles.userInfo,
+                            height: isUserInfoShow ? 'auto' : 0
+                        }, children: _jsx("ul", { style: { listStyle: 'none', margin: 0, padding: 0 }, children: menuItems.map((item, index) => (_jsx("li", { children: item.href ? (_jsx("a", { href: item.href, style: headerStyles.menuItem, children: item.label })) : (_jsx("a", { href: "javascript:void(0)", onClick: (e) => { e.preventDefault(); item.action?.(); }, style: headerStyles.menuItem, children: item.label })) }, index))) }) })] })), showLoginModal && (_jsx("div", { style: modalStyles.overlay, onClick: (e) => e.target === e.currentTarget && closeLoginModal(), children: _jsxs("div", { style: modalStyles.modal, children: [_jsxs("div", { style: modalStyles.header, children: [_jsx("h3", { style: modalStyles.title, children: "\u7528\u6237\u767B\u5F55" }), _jsx("button", { style: modalStyles.closeBtn, onClick: closeLoginModal, children: "\u00D7" })] }), _jsxs("div", { style: modalStyles.body, children: [loginError && _jsx("div", { style: modalStyles.error, children: loginError }), _jsxs("div", { style: modalStyles.formGroup, children: [_jsx("label", { style: modalStyles.label, children: "\u7528\u6237\u540D" }), _jsx("input", { type: "text", style: modalStyles.input, placeholder: "\u8BF7\u8F93\u5165\u7528\u6237\u540D", value: loginForm.username, onChange: (e) => setLoginForm(prev => ({ ...prev, username: e.target.value })), onKeyDown: handleKeyDown })] }), _jsxs("div", { style: modalStyles.formGroup, children: [_jsx("label", { style: modalStyles.label, children: "\u5BC6\u7801" }), _jsx("input", { type: "password", style: modalStyles.input, placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801", value: loginForm.password, onChange: (e) => setLoginForm(prev => ({ ...prev, password: e.target.value })), onKeyDown: handleKeyDown })] })] }), _jsxs("div", { style: modalStyles.footer, children: [_jsx("button", { style: { ...modalStyles.btn, ...modalStyles.btnCancel }, onClick: closeLoginModal, children: "\u53D6\u6D88" }), _jsx("button", { style: {
                                         ...modalStyles.btn,
                                         ...(loginLoading ? modalStyles.btnDisabled : modalStyles.btnSubmit)
                                     }, onClick: submitLogin, disabled: loginLoading, children: loginLoading ? '登录中...' : '登录' })] })] }) }))] }));

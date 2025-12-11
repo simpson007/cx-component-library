@@ -8,6 +8,7 @@
 - 支持 Vue 2/3、React、纯 JS 项目
 - 登录成功自动存储 token 到 cookie
 - 支持自定义操作按钮（通过插槽/children）
+- 支持 loading 状态骨架屏，优化页面刷新体验
 
 ## 安装
 
@@ -160,6 +161,7 @@ export default defineConfig({
 ### 组件使用
 
 > 登录弹框已内置，点击"登录"菜单会自动弹出登录框，登录成功后触发 `@login-success` 事件。
+> 使用 `loading` prop 可以在数据加载时显示骨架屏，避免页面闪烁。
 
 ```vue
 <template>
@@ -168,6 +170,7 @@ export default defineConfig({
     :school-info="schoolInfo"
     :is-login="isLogin"
     :has-roles="hasRoles"
+    :loading="loading"
     :base-url="baseUrl"
     @logout="handleLogout"
     @login-success="handleLoginSuccess"
@@ -188,6 +191,7 @@ const userInfo = ref({ id: '', name: '游客' })
 const schoolInfo = ref({ logo: '', name: '' })
 const isLogin = ref(false)
 const hasRoles = ref(false)
+const loading = ref(true) // 初始为 loading 状态
 const baseUrl = 'https://cx.istemedu.com'
 
 function getCookie(name) {
@@ -196,19 +200,23 @@ function getCookie(name) {
 }
 
 onMounted(async () => {
-  // 获取学校信息
-  const schoolRes = await getSchoolInfo()
-  if (schoolRes.body) schoolInfo.value = schoolRes.body
+  try {
+    // 获取学校信息
+    const schoolRes = await getSchoolInfo()
+    if (schoolRes.body) schoolInfo.value = schoolRes.body
 
-  // 检查登录状态
-  const token = getCookie('token')
-  if (token) {
-    const userRes = await getUserInfo()
-    if (userRes.body) {
-      userInfo.value = userRes.body
-      isLogin.value = true
-      hasRoles.value = true
+    // 检查登录状态
+    const token = getCookie('token')
+    if (token) {
+      const userRes = await getUserInfo()
+      if (userRes.body) {
+        userInfo.value = userRes.body
+        isLogin.value = true
+        hasRoles.value = true
+      }
     }
+  } finally {
+    loading.value = false // 数据加载完成，关闭骨架屏
   }
 })
 
@@ -455,6 +463,7 @@ const file = dataURLtoFile(dataUrl, 'image.png')
 | `schoolInfo` | `{ logo: string, name: string }` | 是 | - | 学校信息 |
 | `isLogin` | `boolean` | 是 | - | 是否已登录 |
 | `hasRoles` | `boolean` | 否 | `false` | 是否有管理权限（显示教师后台等菜单） |
+| `loading` | `boolean` | 否 | `false` | 加载状态，为 true 时显示骨架屏 |
 | `baseUrl` | `string` | 否 | `''` | API 基础地址（用于登录请求） |
 | `loginApi` | `string` | 否 | `/api/v1/school/login` | 登录接口路径 |
 | `translations` | `object` | 否 | - | 自定义文案 |

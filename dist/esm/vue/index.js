@@ -1,6 +1,6 @@
 // Vue 组件导出
 // 内置登录弹框的 Header 组件
-// 组件样式
+// 组件样式（包含骨架屏动画）
 export const headerCss = `
 .shared-header {
   position: relative;
@@ -86,6 +86,39 @@ export const headerCss = `
 .shared-header .user-menu-glyph.show {
   transform: rotateX(180deg);
 }
+
+/* 骨架屏样式 */
+@keyframes skeleton-pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+.shared-header .skeleton {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+.shared-header .skeleton-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+}
+.shared-header .skeleton-title {
+  width: 80px;
+  height: 16px;
+  margin-left: 10px;
+}
+.shared-header .skeleton-user {
+  width: 70px;
+  height: 32px;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 3px;
+}
+
+/* 登录弹框样式 */
 .shared-header .login-modal-overlay {
   position: fixed;
   top: 0;
@@ -223,6 +256,7 @@ export const SharedHeader = {
         schoolInfo: { type: Object, default: () => ({}) },
         isLogin: { type: Boolean, default: false },
         hasRoles: { type: Boolean, default: false },
+        loading: { type: Boolean, default: false },
         translations: { type: Object, default: () => ({}) },
         loginApi: { type: String, default: '/api/v1/school/login' },
         baseUrl: { type: String, default: '' }
@@ -322,29 +356,45 @@ export const SharedHeader = {
     },
     template: `
     <div class="shared-header">
+      <!-- Logo 区域 -->
       <div class="header-logo" @click="handleGoHome">
-        <template v-if="schoolInfo && schoolInfo.logo">
+        <template v-if="loading">
+          <div class="skeleton skeleton-logo"></div>
+          <div class="skeleton skeleton-title"></div>
+        </template>
+        <template v-else-if="schoolInfo && schoolInfo.logo">
           <img :src="schoolInfo.logo" alt="logo" />
           <span class="tit">{{ schoolInfo.name }}</span>
         </template>
       </div>
-      <div class="header-actions">
+
+      <!-- 自定义操作区域 -->
+      <div class="header-actions" v-if="!loading">
         <slot name="actions"></slot>
       </div>
-      <div class="header-user-name" @click="toggleUserInfo">
-        <i class="fa fa-user-o"></i>
-        <span>{{ userInfo?.name || '游客' }}</span>
-        <span class="user-menu-glyph" :class="{ show: isUserInfoShow }">▼</span>
-      </div>
-      <div class="header-user-info" :style="{ height: isUserInfoShow ? 'auto' : '0' }">
-        <ul>
-          <li v-if="hasRoles"><a href="/teacher">{{ t.teacherDashboard }}</a></li>
-          <li v-if="hasRoles"><a href="/services/admin/home">{{ t.background }}</a></li>
-          <li v-if="isLogin"><a href="/account">{{ t.account }}</a></li>
-          <li v-if="isLogin"><a href="javascript:void(0)" @click.prevent="handleLogout">{{ t.logout }}</a></li>
-          <li v-if="!isLogin"><a href="javascript:void(0)" @click.prevent="openLoginModal">{{ t.login }}</a></li>
-        </ul>
-      </div>
+
+      <!-- 用户信息区域 -->
+      <template v-if="loading">
+        <div class="skeleton skeleton-user"></div>
+      </template>
+      <template v-else>
+        <div class="header-user-name" @click="toggleUserInfo">
+          <i class="fa fa-user-o"></i>
+          <span>{{ userInfo?.name || '游客' }}</span>
+          <span class="user-menu-glyph" :class="{ show: isUserInfoShow }">▼</span>
+        </div>
+        <div class="header-user-info" :style="{ height: isUserInfoShow ? 'auto' : '0' }">
+          <ul>
+            <li v-if="hasRoles"><a href="/teacher">{{ t.teacherDashboard }}</a></li>
+            <li v-if="hasRoles"><a href="/services/admin/home">{{ t.background }}</a></li>
+            <li v-if="isLogin"><a href="/account">{{ t.account }}</a></li>
+            <li v-if="isLogin"><a href="javascript:void(0)" @click.prevent="handleLogout">{{ t.logout }}</a></li>
+            <li v-if="!isLogin"><a href="javascript:void(0)" @click.prevent="openLoginModal">{{ t.login }}</a></li>
+          </ul>
+        </div>
+      </template>
+
+      <!-- 登录弹框 -->
       <div class="login-modal-overlay" :class="{ show: showLoginModal }" @click.self="closeLoginModal">
         <div class="login-modal">
           <div class="login-modal-header">

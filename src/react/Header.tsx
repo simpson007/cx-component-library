@@ -6,6 +6,7 @@ interface SharedHeaderProps extends HeaderProps {
   children?: ReactNode
   loginApi?: string
   baseUrl?: string
+  loading?: boolean
   onLoginSuccess?: (userData: any) => void
 }
 
@@ -104,8 +105,57 @@ const modalStyles: Record<string, React.CSSProperties> = {
   }
 }
 
+// 骨架屏样式
+const skeletonStyles: Record<string, React.CSSProperties> = {
+  base: {
+    background: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 4,
+    animation: 'skeleton-pulse 1.5s ease-in-out infinite'
+  },
+  logo: {
+    width: 36,
+    height: 36,
+    borderRadius: 4
+  },
+  title: {
+    width: 80,
+    height: 16,
+    marginLeft: 10
+  },
+  user: {
+    width: 70,
+    height: 32,
+    position: 'absolute' as const,
+    right: 20,
+    top: '50%',
+    transform: 'translateY(-50%)',
+    borderRadius: 3
+  }
+}
+
+// 注入骨架屏动画样式
+let skeletonStyleInjected = false
+function injectSkeletonStyle() {
+  if (skeletonStyleInjected || typeof document === 'undefined') return
+  const style = document.createElement('style')
+  style.textContent = `
+    @keyframes skeleton-pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+  `
+  document.head.appendChild(style)
+  skeletonStyleInjected = true
+}
+
 export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
-  const { loginApi = '/api/v1/school/login', baseUrl = '', onLoginSuccess } = props
+  const { loginApi = '/api/v1/school/login', baseUrl = '', loading = false, onLoginSuccess } = props
+  
+  // 注入骨架屏动画样式
+  React.useEffect(() => {
+    injectSkeletonStyle()
+  }, [])
   
   const [isUserInfoShow, setIsUserInfoShow] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
@@ -203,7 +253,12 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
     <div style={{ position: 'relative', backgroundColor: '#edae24', height: 50, display: 'flex', alignItems: 'center' }}>
       {/* Logo */}
       <div style={headerStyles.logo} onClick={controller.handleGoHome.bind(controller)}>
-        {props.schoolInfo && Object.keys(props.schoolInfo).length > 0 && (
+        {loading ? (
+          <div style={headerStyles.logoImage}>
+            <div style={{ ...skeletonStyles.base, ...skeletonStyles.logo }} />
+            <div style={{ ...skeletonStyles.base, ...skeletonStyles.title }} />
+          </div>
+        ) : props.schoolInfo && Object.keys(props.schoolInfo).length > 0 ? (
           <div style={headerStyles.logoImage}>
             <img 
               style={headerStyles.logoImg} 
@@ -212,60 +267,66 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
             />
             <div style={headerStyles.logoTitle}>{props.schoolInfo.name}</div>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* 自定义操作区域 */}
-      {props.children && (
+      {!loading && props.children && (
         <div style={{ position: 'absolute', right: 116, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 10 }}>
           {props.children}
         </div>
       )}
 
-      {/* User Name */}
-      <div style={headerStyles.userName} onClick={toggleUserInfo}>
-        <i className="fa fa-user-o" style={{ marginRight: 4 }} />
-        <span>{props.userInfo.name}</span>
-        <span 
-          style={{ 
-            display: 'inline-block',
-            transition: 'transform 0.5s',
-            transform: isUserInfoShow ? 'rotateX(180deg)' : 'none',
-            marginLeft: 4,
-            fontSize: 12
-          }}
-        >
-          ▼
-        </span>
-      </div>
+      {/* User Name / Skeleton */}
+      {loading ? (
+        <div style={{ ...skeletonStyles.base, ...skeletonStyles.user }} />
+      ) : (
+        <>
+          <div style={headerStyles.userName} onClick={toggleUserInfo}>
+            <i className="fa fa-user-o" style={{ marginRight: 4 }} />
+            <span>{props.userInfo.name}</span>
+            <span 
+              style={{ 
+                display: 'inline-block',
+                transition: 'transform 0.5s',
+                transform: isUserInfoShow ? 'rotateX(180deg)' : 'none',
+                marginLeft: 4,
+                fontSize: 12
+              }}
+            >
+              ▼
+            </span>
+          </div>
 
-      {/* User Info Dropdown */}
-      <div 
-        style={{
-          ...headerStyles.userInfo,
-          height: isUserInfoShow ? 'auto' : 0
-        }}
-      >
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {menuItems.map((item, index) => (
-            <li key={index}>
-              {item.href ? (
-                <a href={item.href} style={headerStyles.menuItem}>
-                  {item.label}
-                </a>
-              ) : (
-                <a 
-                  href="javascript:void(0)" 
-                  onClick={(e) => { e.preventDefault(); item.action?.() }}
-                  style={headerStyles.menuItem}
-                >
-                  {item.label}
-                </a>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+          {/* User Info Dropdown */}
+          <div 
+            style={{
+              ...headerStyles.userInfo,
+              height: isUserInfoShow ? 'auto' : 0
+            }}
+          >
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+              {menuItems.map((item, index) => (
+                <li key={index}>
+                  {item.href ? (
+                    <a href={item.href} style={headerStyles.menuItem}>
+                      {item.label}
+                    </a>
+                  ) : (
+                    <a 
+                      href="javascript:void(0)" 
+                      onClick={(e) => { e.preventDefault(); item.action?.() }}
+                      style={headerStyles.menuItem}
+                    >
+                      {item.label}
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
+      )}
 
       {/* 登录弹框 */}
       {showLoginModal && (
