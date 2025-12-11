@@ -72,6 +72,10 @@ const headerCss = `
   align-items: center;
   gap: 10px;
 }
+.shared-header .header-actions {
+  display: flex;
+  gap: 10px;
+}
 .shared-header .header-user-name {
   height: 32px;
   background-color: #0a3055;
