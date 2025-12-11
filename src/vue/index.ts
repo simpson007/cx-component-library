@@ -367,7 +367,8 @@ export const SharedHeader = {
           self.loginError = data.head?.msg || '登录失败'
         }
       } catch (error: any) {
-        self.loginError = error.message || '网络错误，请重试'
+        // 优先从响应中提取 msg
+        self.loginError = error.response?.data?.head?.msg || error.message || '网络错误，请重试'
       } finally {
         self.loginLoading = false
       }

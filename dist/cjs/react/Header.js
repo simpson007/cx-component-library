@@ -323,7 +323,9 @@ const SharedHeader = (props) => {
             }
         }
         catch (error) {
-            setLoginError(error.message || '网络错误，请重试');
+            // 优先从响应中提取 msg
+            const msg = error.response?.data?.head?.msg || error.message || '网络错误，请重试';
+            setLoginError(msg);
         }
         finally {
             setLoginLoading(false);
