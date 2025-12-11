@@ -8,21 +8,14 @@
 
 ```bash
 # HTTPS 方式
-npm install git+https://github.com/your-org/cx-component-library.git
-
-# SSH 方式（推荐）
-npm install git+ssh://git@github.com:your-org/cx-component-library.git
-
-# 指定版本/tag
-npm install git+ssh://git@github.com:your-org/cx-component-library.git#v1.0.1
-```
+npm install git+https://github.com/simpson007/cx-component-library.git
 
 或在 package.json 中直接添加：
 
 ```json
 {
   "dependencies": {
-    "cx-component-library": "git+ssh://git@github.com:your-org/cx-component-library.git#v1.0.1"
+    "cx-component-library": "git+https://github.com/simpson007/cx-component-library.git"
   }
 }
 ```
