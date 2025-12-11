@@ -7,6 +7,7 @@ export interface UserInfo {
     id: string | number;
     name: string;
     role?: UserRole[];
+    roles?: UserRole[];
     [key: string]: unknown;
 }
 export type UserRoleType = 'guest' | 'user' | 'admin' | 'superAdmin';

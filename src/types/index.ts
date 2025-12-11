@@ -9,6 +9,7 @@ export interface UserInfo {
   id: string | number
   name: string
   role?: UserRole[]
+  roles?: UserRole[] // API 实际返回的字段名
   [key: string]: unknown
 }
 
