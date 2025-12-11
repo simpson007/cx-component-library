@@ -1,6 +1,6 @@
 // Vue 组件导出
 // 内置登录弹框的 Header 组件
-import { getBaseUrl } from '../api/http';
+import { postSchoolLogin } from '../api/endpoints';
 // 组件样式（包含骨架屏动画）
 export const headerCss = `
 .shared-header {
@@ -350,11 +350,8 @@ export const SharedHeader = {
                 const formData = new FormData();
                 formData.append('username', self.loginForm.username);
                 formData.append('password', self.loginForm.password);
-                // 优先使用组件 prop 的 baseUrl，否则使用 initHttp 配置的 baseUrl
-                const baseUrl = self.baseUrl || getBaseUrl();
-                const url = baseUrl + self.loginApi;
-                const response = await fetch(url, { method: 'POST', body: formData });
-                const data = await response.json();
+                // 使用 postSchoolLogin API（会自动使用 initHttp 配置的 baseUrl）
+                const data = await postSchoolLogin(formData);
                 if (data.head?.code === '1000' && data.body) {
                     const token = data.body.token;
                     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();

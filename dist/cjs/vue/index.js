@@ -4,7 +4,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.styles = exports.SharedHeader = exports.headerCss = void 0;
 exports.install = install;
-const http_1 = require("../api/http");
+const endpoints_1 = require("../api/endpoints");
 // 组件样式（包含骨架屏动画）
 exports.headerCss = `
 .shared-header {
@@ -355,11 +355,8 @@ exports.SharedHeader = {
                 const formData = new FormData();
                 formData.append('username', self.loginForm.username);
                 formData.append('password', self.loginForm.password);
-                // 优先使用组件 prop 的 baseUrl，否则使用 initHttp 配置的 baseUrl
-                const baseUrl = self.baseUrl || (0, http_1.getBaseUrl)();
-                const url = baseUrl + self.loginApi;
-                const response = await fetch(url, { method: 'POST', body: formData });
-                const data = await response.json();
+                // 使用 postSchoolLogin API（会自动使用 initHttp 配置的 baseUrl）
+                const data = await (0, endpoints_1.postSchoolLogin)(formData);
                 if (data.head?.code === '1000' && data.body) {
                     const token = data.body.token;
                     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();

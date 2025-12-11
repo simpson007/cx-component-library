@@ -1,7 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useState, useMemo, useCallback } from 'react';
 import { HeaderController, headerStyles } from '../components/Header';
-import { getBaseUrl } from '../api/http';
+import { postSchoolLogin } from '../api/endpoints';
 // 登录弹框样式
 const modalStyles = {
     overlay: {
@@ -179,14 +179,8 @@ export const SharedHeader = (props) => {
             const formData = new FormData();
             formData.append('username', loginForm.username);
             formData.append('password', loginForm.password);
-            // 优先使用组件 prop 的 baseUrl，否则使用 initHttp 配置的 baseUrl
-            const actualBaseUrl = baseUrl || getBaseUrl();
-            const url = actualBaseUrl + loginApi;
-            const response = await fetch(url, {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
+            // 使用 postSchoolLogin API（会自动使用 initHttp 配置的 baseUrl）
+            const data = await postSchoolLogin(formData);
             if (data.head?.code === '1000' && data.body) {
                 // 登录成功，存储 token 到 cookie
                 const token = data.body.token;
@@ -205,7 +199,7 @@ export const SharedHeader = (props) => {
         finally {
             setLoginLoading(false);
         }
-    }, [loginForm, baseUrl, loginApi, onLoginSuccess, closeLoginModal]);
+    }, [loginForm, onLoginSuccess, closeLoginModal]);
     const handleKeyDown = useCallback((e) => {
         if (e.key === 'Enter') {
             submitLogin();

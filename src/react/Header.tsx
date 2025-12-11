@@ -1,6 +1,6 @@
 import React, { useState, useMemo, ReactNode, useCallback } from 'react'
 import { HeaderController, headerStyles } from '../components/Header'
-import { getBaseUrl } from '../api/http'
+import { postSchoolLogin } from '../api/endpoints'
 import type { HeaderProps } from '../types'
 
 interface SharedHeaderProps extends HeaderProps {
@@ -201,19 +201,12 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
       formData.append('username', loginForm.username)
       formData.append('password', loginForm.password)
 
-      // 优先使用组件 prop 的 baseUrl，否则使用 initHttp 配置的 baseUrl
-      const actualBaseUrl = baseUrl || getBaseUrl()
-      const url = actualBaseUrl + loginApi
-      const response = await fetch(url, {
-        method: 'POST',
-        body: formData
-      })
-
-      const data = await response.json()
+      // 使用 postSchoolLogin API（会自动使用 initHttp 配置的 baseUrl）
+      const data = await postSchoolLogin(formData)
 
       if (data.head?.code === '1000' && data.body) {
         // 登录成功，存储 token 到 cookie
-        const token = data.body.token
+        const token = (data.body as any).token
         const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString()
         document.cookie = `token=${token}; expires=${expires}; path=/`
 
@@ -227,7 +220,7 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
     } finally {
       setLoginLoading(false)
     }
-  }, [loginForm, baseUrl, loginApi, onLoginSuccess, closeLoginModal])
+  }, [loginForm, onLoginSuccess, closeLoginModal])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
