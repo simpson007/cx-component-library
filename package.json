@@ -1,6 +1,6 @@
 {
   "name": "cx-component-library",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "畅学通用组件和API库",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",

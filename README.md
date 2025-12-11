@@ -9,46 +9,52 @@
 - 登录成功自动存储 token 到 cookie
 - 支持自定义操作按钮（通过插槽/children）
 - 支持 loading 状态骨架屏，优化页面刷新体验
-- 未登录时显示登录按钮，已登录时显示用户名+下拉菜单
-- 下拉菜单内容可完全自定义
 - 内置用户角色判断工具函数
 
 ## 安装
 
 ```bash
-npm install git+https://github.com/simpson007/cx-component-library.git#v1.0.10
+npm install git+https://github.com/simpson007/cx-component-library.git#v1.0.11
 ```
 
 ## 快速开始
 
 ### 1. 初始化 HTTP 客户端
 
+⚠️ **重要：请根据环境正确配置 baseUrl**
+
 ```javascript
 import { initHttp } from 'cx-component-library/api'
 
-// 开发环境自动使用 https://cx.istemedu.com，生产环境为空
-// 也可以手动指定 baseUrl
+// 方式一：使用 isDev 标记（推荐）
 initHttp({
-  // baseUrl: 'https://cx.istemedu.com', // 可选，开发环境默认自动设置
+  isDev: import.meta.env.DEV, // Vite 项目
+  // isDev: process.env.NODE_ENV === 'development', // Webpack 项目
   getToken: () => document.cookie.match(/token=([^;]+)/)?.[1] || null,
   onUnauthorized: () => {
     window.location.href = '/login'
   }
 })
+
+// 方式二：直接指定 baseUrl
+initHttp({
+  baseUrl: import.meta.env.DEV ? 'https://cx.istemedu.com' : '',
+  getToken: () => document.cookie.match(/token=([^;]+)/)?.[1] || null
+})
 ```
+
+| 环境 | baseUrl | 说明 |
+|------|---------|------|
+| 开发环境 | `https://cx.istemedu.com` | 跨域请求到测试服务器 |
+| 生产环境 | `''`（空字符串） | 使用相对路径，同域请求 |
 
 ### 2. 使用 API
 
 ```javascript
 import { getSchoolInfo, getUserInfo } from 'cx-component-library/api'
 
-// 获取学校信息（无需登录）
 const schoolRes = await getSchoolInfo()
-console.log(schoolRes.body) // { logo: '...', name: '...' }
-
-// 获取用户信息（需要登录）
 const userRes = await getUserInfo()
-console.log(userRes.body) // { id: 123, name: '张三', role: [...] }
 ```
 
 ## API 列表
@@ -104,8 +110,8 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { initHttp } from 'cx-component-library/api'
 
-// 开发环境自动使用 https://cx.istemedu.com
 initHttp({
+  isDev: import.meta.env.DEV, // ⚠️ 生产环境会自动使用空 baseUrl
   getToken: () => document.cookie.match(/token=([^;]+)/)?.[1] || null
 })
 
@@ -207,6 +213,7 @@ import { initHttp, getSchoolInfo, getUserInfo } from 'cx-component-library/api'
 import { isAdmin } from 'cx-component-library'
 
 initHttp({
+  isDev: import.meta.env.DEV,
   getToken: () => document.cookie.match(/token=([^;]+)/)?.[1] || null
 })
 
@@ -261,16 +268,18 @@ function App() {
 | `schoolInfo` | `{ logo, name }` | 是 | - | 学校信息 |
 | `isLogin` | `boolean` | 是 | - | 是否已登录 |
 | `loading` | `boolean` | 否 | `false` | 加载状态（显示骨架屏） |
-| `baseUrl` | `string` | 否 | 自动 | API 基础地址（开发环境默认 cx.istemedu.com） |
+| `baseUrl` | `string` | 否 | - | 登录接口的基础地址 |
 | `loginApi` | `string` | 否 | `/api/v1/school/login` | 登录接口路径 |
 
-## Header 组件 Events
+## initHttp 配置项
 
-| Vue | React | 说明 |
-|-----|-------|------|
-| `@logout` | `onLogout` | 点击退出登录 |
-| `@login-success` | `onLoginSuccess` | 登录成功 |
-| `@go-home` | `onGoHome` | 点击 Logo |
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `baseUrl` | `string` | API 基础地址，生产环境设为 `''` |
+| `isDev` | `boolean` | 是否开发环境，为 true 且未设置 baseUrl 时自动使用 `https://cx.istemedu.com` |
+| `timeout` | `number` | 请求超时时间，默认 30000ms |
+| `getToken` | `() => string` | 获取 token 的函数 |
+| `onUnauthorized` | `() => void` | 未授权时的回调 |
 
 ## 环境要求
 
@@ -280,16 +289,15 @@ function App() {
 
 ## 更新日志
 
+### v1.0.11
+- 新增 `isDev` 配置项，方便区分开发/生产环境
+- 优化 baseUrl 配置说明
+
 ### v1.0.10
-- 开发环境默认 baseUrl 为 https://cx.istemedu.com，生产环境为空
 - 新增用户角色判断工具函数：getUserRole、isAdmin、isSuperAdmin
 
 ### v1.0.9
 - 精简 API，只保留核心接口
-- 移除 OSS 上传功能
-
-### v1.0.8
-- 下拉菜单每项高度改为 32px
 
 ## License
 
