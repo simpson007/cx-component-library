@@ -79,6 +79,8 @@ const headerCss = `
   z-index: 1999;
   overflow: hidden;
   transition: height 0.3s;
+  white-space: nowrap;
+  min-width: max-content;
 }
 .shared-header .header-user-info ul {
   list-style: none;
@@ -221,14 +223,14 @@ class SharedHeader {
     constructor(options) {
         this.isUserInfoShow = false;
         this.showLoginModal = false;
+        this.eventsBound = false;
         injectStyle();
         this.options = options;
-        const container = typeof options.container === 'string'
-            ? document.querySelector(options.container)
-            : options.container;
+        const container = typeof options.container === 'string' ? document.querySelector(options.container) : options.container;
         if (!container)
             throw new Error('Container not found');
         this.container = container;
+        this.bindEvents();
         this.render();
     }
     get t() {
@@ -245,23 +247,30 @@ class SharedHeader {
         const { userInfo, schoolInfo, isLogin, loading } = this.options;
         this.container.innerHTML = `
       <div class="shared-header">
-        <div class="header-logo">
-          ${loading ? `
+        <div class="header-logo" data-action="go-home">
+          ${loading
+            ? `
             <div class="skeleton skeleton-logo"></div>
             <div class="skeleton skeleton-title"></div>
-          ` : schoolInfo?.logo ? `
+          `
+            : schoolInfo?.logo
+                ? `
             <img src="${schoolInfo.logo}" alt="logo" />
             <span class="tit">${schoolInfo.name || ''}</span>
-          ` : ''}
+          `
+                : ''}
         </div>
-        ${loading ? `
+        ${loading
+            ? `
           <div class="header-right">
             <div class="skeleton skeleton-user"></div>
           </div>
-        ` : `
+        `
+            : `
           <div class="header-right">
             <div class="header-actions"></div>
-            ${isLogin ? `
+            ${isLogin
+                ? `
               <div style="position: relative;">
                 <div class="header-user-name" data-action="toggle-menu">
                   <span>${userInfo?.name || '游客'}</span>
@@ -273,13 +282,14 @@ class SharedHeader {
                   </ul>
                 </div>
               </div>
-            ` : `
+            `
+                : `
               <button class="header-login-btn" data-action="open-login">${this.t.login}</button>
             `}
           </div>
         `}
         <div class="login-modal-overlay ${this.showLoginModal ? 'show' : ''}" data-action="close-modal-overlay">
-          <div class="login-modal">
+          <div class="login-modal" data-action="stop">
             <div class="login-modal-header">
               <h3>用户登录</h3>
               <button class="login-modal-close" data-action="close-modal">&times;</button>
@@ -288,11 +298,11 @@ class SharedHeader {
               <div class="login-error"></div>
               <div class="login-form-group">
                 <label>用户名</label>
-                <input type="text" id="sh-username" placeholder="请输入用户名" />
+                <input type="text" class="sh-username" placeholder="请输入用户名" />
               </div>
               <div class="login-form-group">
                 <label>密码</label>
-                <input type="password" id="sh-password" placeholder="请输入密码" />
+                <input type="password" class="sh-password" placeholder="请输入密码" />
               </div>
             </div>
             <div class="login-modal-footer">
@@ -303,54 +313,86 @@ class SharedHeader {
         </div>
       </div>
     `;
-        this.bindEvents();
     }
     bindEvents() {
+        if (this.eventsBound)
+            return;
+        this.eventsBound = true;
+        // 使用事件委托，只绑定一次
         this.container.addEventListener('click', (e) => {
             const target = e.target;
-            const action = target.dataset.action || target.closest('[data-action]')?.getAttribute('data-action');
+            const actionEl = target.closest('[data-action]');
+            const action = actionEl?.dataset.action;
+            if (!action)
+                return;
             switch (action) {
                 case 'toggle-menu':
                     this.isUserInfoShow = !this.isUserInfoShow;
-                    this.render();
+                    this.updateMenuState();
                     break;
                 case 'logout':
+                    this.isUserInfoShow = false;
                     this.options.onLogout?.();
+                    break;
+                case 'go-home':
+                    this.options.onGoHome?.();
                     break;
                 case 'open-login':
                     this.showLoginModal = true;
-                    this.render();
+                    this.updateModalState();
                     break;
                 case 'close-modal':
                     this.showLoginModal = false;
-                    this.render();
+                    this.updateModalState();
                     break;
                 case 'close-modal-overlay':
+                    // 只有点击遮罩层本身才关闭
                     if (target.classList.contains('login-modal-overlay')) {
                         this.showLoginModal = false;
-                        this.render();
+                        this.updateModalState();
                     }
                     break;
                 case 'submit-login':
                     this.submitLogin();
                     break;
+                case 'stop':
+                    // 阻止冒泡到 overlay
+                    break;
             }
         });
-        // Logo 点击
-        const logo = this.container.querySelector('.header-logo');
-        logo?.addEventListener('click', () => this.options.onGoHome?.());
         // Enter 键提交
-        const inputs = this.container.querySelectorAll('#sh-username, #sh-password');
-        inputs.forEach(input => {
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter')
+        this.container.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const target = e.target;
+                if (target.classList.contains('sh-username') || target.classList.contains('sh-password')) {
                     this.submitLogin();
-            });
+                }
+            }
         });
     }
+    updateMenuState() {
+        const glyph = this.container.querySelector('.user-menu-glyph');
+        const menu = this.container.querySelector('.header-user-info');
+        if (glyph) {
+            glyph.classList.toggle('show', this.isUserInfoShow);
+        }
+        if (menu) {
+            menu.style.height = this.isUserInfoShow ? 'auto' : '0';
+        }
+    }
+    updateModalState() {
+        const overlay = this.container.querySelector('.login-modal-overlay');
+        const errorEl = this.container.querySelector('.login-error');
+        if (overlay) {
+            overlay.classList.toggle('show', this.showLoginModal);
+        }
+        if (errorEl && !this.showLoginModal) {
+            errorEl.classList.remove('show');
+        }
+    }
     async submitLogin() {
-        const username = this.container.querySelector('#sh-username')?.value;
-        const password = this.container.querySelector('#sh-password')?.value;
+        const username = this.container.querySelector('.sh-username')?.value;
+        const password = this.container.querySelector('.sh-password')?.value;
         const errorEl = this.container.querySelector('.login-error');
         const submitBtn = this.container.querySelector('[data-action="submit-login"]');
         if (!username) {
@@ -376,7 +418,7 @@ class SharedHeader {
                 const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
                 document.cookie = `token=${token}; expires=${expires}; path=/`;
                 this.showLoginModal = false;
-                this.render();
+                this.updateModalState();
                 this.options.onLoginSuccess?.(data.body);
             }
             else {
@@ -395,11 +437,11 @@ class SharedHeader {
     }
     openLoginModal() {
         this.showLoginModal = true;
-        this.render();
+        this.updateModalState();
     }
     closeLoginModal() {
         this.showLoginModal = false;
-        this.render();
+        this.updateModalState();
     }
 }
 exports.SharedHeader = SharedHeader;

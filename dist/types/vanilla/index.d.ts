@@ -15,11 +15,14 @@ export declare class SharedHeader {
     private options;
     private isUserInfoShow;
     private showLoginModal;
+    private eventsBound;
     constructor(options: VanillaHeaderOptions);
     private get t();
     update(options: Partial<VanillaHeaderOptions>): void;
     private render;
     private bindEvents;
+    private updateMenuState;
+    private updateModalState;
     private submitLogin;
     openLoginModal(): void;
     closeLoginModal(): void;
