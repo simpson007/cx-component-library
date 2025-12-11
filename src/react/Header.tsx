@@ -255,87 +255,93 @@ export const SharedHeader: React.FC<SharedHeaderProps> = (props) => {
         ) : null}
       </div>
 
-      {/* 自定义操作区域 */}
-      {!loading && props.children && (
-        <div style={{ position: 'absolute', right: 116, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 10 }}>
-          {props.children}
-        </div>
-      )}
-
-      {/* User Name / Login Button / Skeleton */}
+      {/* 右侧区域：自定义按钮 + 用户/登录 */}
       {loading ? (
         <div style={{ ...skeletonStyles.base, ...skeletonStyles.user }} />
-      ) : props.isLogin ? (
-        <>
-          {/* 已登录：显示用户名+下拉箭头 */}
-          <div style={headerStyles.userName} onClick={toggleUserInfo}>
-            <i className="fa fa-user-o" style={{ marginRight: 4 }} />
-            <span>{props.userInfo.name}</span>
-            <span 
-              style={{ 
-                display: 'inline-block',
-                transition: 'transform 0.5s',
-                transform: isUserInfoShow ? 'rotateX(180deg)' : 'none',
-                marginLeft: 4,
-                fontSize: 12
-              }}
-            >
-              ▼
-            </span>
-          </div>
-
-          {/* User Info Dropdown */}
-          <div 
-            style={{
-              ...headerStyles.userInfo,
-              height: isUserInfoShow ? 'auto' : 0
-            }}
-          >
-            {props.menuContent || (
-              <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {props.hasRoles && (
-                  <>
-                    <li><a href="/teacher" style={headerStyles.menuItem}>{t.teacherDashboard}</a></li>
-                    <li><a href="/services/admin/home" style={headerStyles.menuItem}>{t.background}</a></li>
-                  </>
-                )}
-                <li><a href="/account" style={headerStyles.menuItem}>{t.account}</a></li>
-                <li>
-                  <a 
-                    href="javascript:void(0)" 
-                    onClick={(e) => { e.preventDefault(); props.onLogout?.() }}
-                    style={headerStyles.menuItem}
-                  >
-                    {t.logout}
-                  </a>
-                </li>
-              </ul>
-            )}
-          </div>
-        </>
       ) : (
-        /* 未登录：显示登录按钮 */
-        <button 
-          style={{
-            position: 'absolute',
-            right: 20,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            height: 32,
-            backgroundColor: '#0a3055',
-            borderRadius: 3,
-            padding: '0 14px',
-            fontSize: 14,
-            lineHeight: '32px',
-            color: '#fff',
-            cursor: 'pointer',
-            border: 'none',
-            zIndex: 1998
-          }}
-          onClick={openLoginModal}
-        >
-          {t.login}
-        </button>
+        <div style={{ position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* 自定义操作区域 */}
+          {props.children && (
+            <div style={{ display: 'flex', gap: 10 }}>
+              {props.children}
+            </div>
+          )}
+
+          {/* User Name / Login Button */}
+          {props.isLogin ? (
+            <div style={{ position: 'relative' }}>
+              {/* 已登录：显示用户名+下拉箭头 */}
+              <div style={{ ...headerStyles.userName, position: 'relative', right: 'auto', top: 'auto', transform: 'none' }} onClick={toggleUserInfo}>
+                <i className="fa fa-user-o" style={{ marginRight: 4 }} />
+                <span>{props.userInfo.name}</span>
+                <span 
+                  style={{ 
+                    display: 'inline-block',
+                    transition: 'transform 0.5s',
+                    transform: isUserInfoShow ? 'rotateX(180deg)' : 'none',
+                    marginLeft: 4,
+                    fontSize: 12
+                  }}
+                >
+                  ▼
+                </span>
+              </div>
+
+              {/* User Info Dropdown */}
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: 32,
+                  right: 0,
+                  backgroundColor: '#0a3055',
+                  zIndex: 1999,
+                  overflow: 'hidden',
+                  transition: 'height 0.5s',
+                  height: isUserInfoShow ? 'auto' : 0
+                }}
+              >
+                {props.menuContent || (
+                  <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                    {props.hasRoles && (
+                      <>
+                        <li><a href="/teacher" style={headerStyles.menuItem}>{t.teacherDashboard}</a></li>
+                        <li><a href="/services/admin/home" style={headerStyles.menuItem}>{t.background}</a></li>
+                      </>
+                    )}
+                    <li><a href="/account" style={headerStyles.menuItem}>{t.account}</a></li>
+                    <li>
+                      <a 
+                        href="javascript:void(0)" 
+                        onClick={(e) => { e.preventDefault(); props.onLogout?.() }}
+                        style={headerStyles.menuItem}
+                      >
+                        {t.logout}
+                      </a>
+                    </li>
+                  </ul>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* 未登录：显示登录按钮 */
+            <button 
+              style={{
+                height: 32,
+                backgroundColor: '#0a3055',
+                borderRadius: 3,
+                padding: '0 14px',
+                fontSize: 14,
+                lineHeight: '32px',
+                color: '#fff',
+                cursor: 'pointer',
+                border: 'none'
+              }}
+              onClick={openLoginModal}
+            >
+              {t.login}
+            </button>
+          )}
+        </div>
       )}
 
       {/* 登录弹框 */}

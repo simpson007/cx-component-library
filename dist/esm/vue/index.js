@@ -8,6 +8,7 @@ export const headerCss = `
   height: 50px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 .shared-header .header-logo {
   position: absolute;
@@ -29,19 +30,20 @@ export const headerCss = `
   color: #fff;
   line-height: 50px;
 }
-.shared-header .header-actions {
-  position: absolute;
-  right: 116px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  gap: 10px;
-}
-.shared-header .header-user-name {
+.shared-header .header-right {
   position: absolute;
   right: 20px;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.shared-header .header-actions {
+  display: flex;
+  gap: 10px;
+}
+.shared-header .header-user-name {
   height: 32px;
   background-color: #0a3055;
   border-radius: 3px;
@@ -53,13 +55,8 @@ export const headerCss = `
   display: flex;
   align-items: center;
   gap: 4px;
-  z-index: 1998;
 }
 .shared-header .header-login-btn {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
   height: 32px;
   background-color: #0a3055;
   border-radius: 3px;
@@ -69,7 +66,6 @@ export const headerCss = `
   color: #fff;
   cursor: pointer;
   border: none;
-  z-index: 1998;
 }
 .shared-header .header-login-btn:hover {
   background-color: #0d3a6a;
@@ -77,7 +73,7 @@ export const headerCss = `
 .shared-header .header-user-info {
   position: absolute;
   top: 50px;
-  right: 20px;
+  right: 0;
   background-color: #0a3055;
   z-index: 1999;
   overflow: hidden;
@@ -393,37 +389,40 @@ export const SharedHeader = {
         </template>
       </div>
 
-      <!-- 自定义操作区域 -->
-      <div class="header-actions" v-if="!loading">
-        <slot name="actions"></slot>
+      <!-- 右侧区域：自定义按钮 + 用户/登录 -->
+      <div class="header-right" v-if="!loading">
+        <!-- 自定义操作区域 -->
+        <div class="header-actions">
+          <slot name="actions"></slot>
+        </div>
+
+        <!-- 用户信息区域 -->
+        <template v-if="isLogin">
+          <!-- 已登录：显示用户名+下拉箭头 -->
+          <div class="header-user-name" @click="toggleUserInfo">
+            <i class="fa fa-user-o"></i>
+            <span>{{ userInfo?.name || '游客' }}</span>
+            <span class="user-menu-glyph" :class="{ show: isUserInfoShow }">▼</span>
+          </div>
+          <div class="header-user-info" :style="{ height: isUserInfoShow ? 'auto' : '0' }">
+            <slot name="menu">
+              <ul>
+                <li v-if="hasRoles"><a href="/teacher">{{ t.teacherDashboard }}</a></li>
+                <li v-if="hasRoles"><a href="/services/admin/home">{{ t.background }}</a></li>
+                <li><a href="/account">{{ t.account }}</a></li>
+                <li><a href="javascript:void(0)" @click.prevent="handleLogout">{{ t.logout }}</a></li>
+              </ul>
+            </slot>
+          </div>
+        </template>
+        <template v-else>
+          <!-- 未登录：显示登录按钮 -->
+          <button class="header-login-btn" @click="openLoginModal">{{ t.login }}</button>
+        </template>
       </div>
 
-      <!-- 用户信息区域 -->
-      <template v-if="loading">
-        <div class="skeleton skeleton-user"></div>
-      </template>
-      <template v-else-if="isLogin">
-        <!-- 已登录：显示用户名+下拉箭头 -->
-        <div class="header-user-name" @click="toggleUserInfo">
-          <i class="fa fa-user-o"></i>
-          <span>{{ userInfo?.name || '游客' }}</span>
-          <span class="user-menu-glyph" :class="{ show: isUserInfoShow }">▼</span>
-        </div>
-        <div class="header-user-info" :style="{ height: isUserInfoShow ? 'auto' : '0' }">
-          <slot name="menu">
-            <ul>
-              <li v-if="hasRoles"><a href="/teacher">{{ t.teacherDashboard }}</a></li>
-              <li v-if="hasRoles"><a href="/services/admin/home">{{ t.background }}</a></li>
-              <li><a href="/account">{{ t.account }}</a></li>
-              <li><a href="javascript:void(0)" @click.prevent="handleLogout">{{ t.logout }}</a></li>
-            </ul>
-          </slot>
-        </div>
-      </template>
-      <template v-else>
-        <!-- 未登录：显示登录按钮 -->
-        <button class="header-login-btn" @click="openLoginModal">{{ t.login }}</button>
-      </template>
+      <!-- Loading 状态骨架屏 -->
+      <div class="skeleton skeleton-user" v-if="loading"></div>
 
       <!-- 登录弹框 -->
       <div class="login-modal-overlay" :class="{ show: showLoginModal }" @click.self="closeLoginModal">
